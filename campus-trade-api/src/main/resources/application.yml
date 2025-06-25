@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: campus-trade-api
+  datasource:
+    url: jdbc:mysql://localhost:3306/campus_trade?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root # 【注意】替换为你的数据库用户名
+    password: root # 【注意】替换为你的数据库密码
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: localhost # 【注意】替换为你的Redis主机
+    port: 6379
+    password: # 【注意】如果你的Redis有密码，请填写
+    database: 0
+  web:
+    resources:
+      static-locations: file:${file.upload.path} # 允许通过URL访问上传的文件
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.campus.trade.mapper: debug
+
+# JWT 配置
+jwt:
+  secret: "a-very-long-and-secure-secret-key-for-campus-trade-project-in-2025" # 【注意】生产环境请使用更安全的密钥
+  expiration: 86400000 # 24小时
+
+# 文件上传配置
+#file:
+#  upload:
+#    path: C:\\Users\\SowrJam\\workspace\\TwoHand_back\\campus-uploads # 【注意】请修改为一个您服务器上的真实目录

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.trade.mapper.FavoriteMapper">
+
+    <insert id="addFavorite">
+        INSERT IGNORE INTO favorites (user_id, product_id) VALUES (#{userId}, #{productId})
+    </insert>
+
+    <delete id="removeFavorite">
+        DELETE FROM favorites WHERE user_id = #{userId} AND product_id = #{productId}
+    </delete>
+
+    <select id="findFavorite" resultType="java.lang.Integer">
+        SELECT 1 FROM favorites WHERE user_id = #{userId} AND product_id = #{productId} LIMIT 1
+    </select>
+
+    <select id="findUserFavoriteProductIds" resultType="java.lang.String">
+        SELECT product_id FROM favorites WHERE user_id = #{userId}
+    </select>
+
+    <select id="findUserFavoriteProducts" resultMap="com.campus.trade.mapper.ProductMapper.ProductWithSeller">
+        SELECT
+            p.id as p_id, p.seller_id, p.category_id, p.title, p.description, p.price,
+            p.condition_level, p.cover_image, p.status as p_status, p.create_time as p_create_time,
+            u.nickname, u.avatar, u.credit_score
+        FROM favorites f
+                 JOIN product p ON f.product_id = p.id
+                 JOIN user u ON p.seller_id = u.id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.create_time DESC
+    </select>
+</mapper>

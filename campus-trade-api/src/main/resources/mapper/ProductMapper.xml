@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.trade.mapper.ProductMapper">
+
+    <resultMap id="ProductWithSeller" type="com.campus.trade.entity.Product">
+        <id property="id" column="p_id"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="conditionLevel" column="condition_level"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="status" column="p_status"/>
+        <result property="createTime" column="p_create_time"/>
+        <result property="sellerNickname" column="nickname"/>
+        <result property="sellerAvatar" column="avatar"/>
+        <!-- 【新增】映射 credit_score 字段 -->
+        <result property="creditScore" column="credit_score"/>
+    </resultMap>
+
+    <!-- 【关键修正】在查询时连带查出卖家的信誉分 -->
+    <sql id="productColumns">
+        p.id as p_id, p.seller_id, p.category_id, p.title, p.description, p.price,
+        p.condition_level, p.cover_image, p.status as p_status, p.create_time as p_create_time,
+        u.nickname, u.avatar, u.credit_score
+    </sql>
+
+    <!-- 所有使用了 <include refid="productColumns"/> 的 <select> 语句都会自动应用此修改 -->
+
+    <select id="findProducts" resultMap="ProductWithSeller">
+        SELECT <include refid="productColumns"/>
+        FROM product p JOIN user u ON p.seller_id = u.id
+        WHERE p.status = 'AVAILABLE'
+        <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="categoryId != null and categoryId != ''">
+            AND p.category_id = #{categoryId}
+        </if>
+        ORDER BY p.create_time DESC
+    </select>
+
+    <select id="findProductById" resultMap="ProductWithSeller">
+        SELECT <include refid="productColumns"/>
+        FROM product p JOIN user u ON p.seller_id = u.id
+        WHERE p.id = #{productId}
+    </select>
+
+    <select id="findAllForAdmin" resultMap="ProductWithSeller">
+        SELECT <include refid="productColumns"/>
+        FROM product p JOIN user u ON p.seller_id = u.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY p.create_time DESC
+    </select>
+
+    <insert id="insertProduct" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product(seller_id, category_id, title, description, price, condition_level, cover_image, status)
+        VALUES(#{sellerId}, #{categoryId}, #{title}, #{description}, #{price}, #{conditionLevel}, #{coverImage}, 'AVAILABLE')
+    </insert>
+
+    <update id="updateProduct">
+        UPDATE product SET
+        category_id = #{categoryId},
+        title = #{title},
+        description = #{description},
+        price = #{price},
+        condition_level = #{conditionLevel},
+        <if test="coverImage != null and coverImage != ''">
+            cover_image = #{coverImage},
+        </if>
+        update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateProductStatus">
+        UPDATE product SET status = #{status} WHERE id = #{productId}
+    </update>
+
+    <select id="countTotalProducts" resultType="long">
+        SELECT COUNT(*) FROM product
+    </select>
+</mapper>

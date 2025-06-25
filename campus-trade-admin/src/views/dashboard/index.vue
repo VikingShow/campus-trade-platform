@@ -1,0 +1,157 @@
+<template>
+  <div class="dashboard-container">
+    <!-- 数据总览卡片 -->
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <div class="stat-card">
+            <el-icon class="icon-user"><User /></el-icon>
+            <div class="stat-info">
+              <div class="stat-title">总用户数</div>
+              <div class="stat-value">{{ summary.userCount }}</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <div class="stat-card">
+             <el-icon class="icon-product"><Goods /></el-icon>
+            <div class="stat-info">
+              <div class="stat-title">总商品数</div>
+              <div class="stat-value">{{ summary.productCount }}</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <div class="stat-card">
+            <el-icon class="icon-order"><Tickets /></el-icon>
+            <div class="stat-info">
+              <div class="stat-title">总订单数</div>
+              <div class="stat-value">{{ summary.orderCount }}</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 图表容器 -->
+    <el-card shadow="hover" style="margin-top: 20px;">
+      <div ref="chartRef" style="width: 100%; height: 400px;"></div>
+    </el-card>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted, reactive } from 'vue';
+import * as echarts from 'echarts';
+import { getSummaryStats, getDailyRegistrationStats } from '../../api/admin';
+import { User, Goods, Tickets } from '@element-plus/icons-vue';
+
+const summary = reactive({
+  userCount: 0,
+  productCount: 0,
+  orderCount: 0,
+});
+const chartRef = ref(null);
+let myChart = null;
+
+const fetchSummary = async () => {
+  try {
+    const response = await getSummaryStats();
+    Object.assign(summary, response.data.data);
+  } catch (error) {
+    console.error("获取总览数据失败:", error);
+  }
+};
+
+const initChart = async () => {
+  if (chartRef.value) {
+    myChart = echarts.init(chartRef.value);
+    myChart.showLoading();
+
+    try {
+      const response = await getDailyRegistrationStats();
+      const chartData = response.data.data;
+      
+      const dates = chartData.map(item => item.date);
+      const counts = chartData.map(item => item.count);
+
+      const option = {
+        title: {
+          text: '最近7日新增用户趋势'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: {
+          type: 'category',
+          data: dates
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [{
+          name: '新增用户数',
+          data: counts,
+          type: 'line',
+          smooth: true,
+          itemStyle: {
+            color: '#409EFF'
+          }
+        }]
+      };
+      myChart.hideLoading();
+      myChart.setOption(option);
+    } catch (error) {
+      console.error("获取图表数据失败:", error);
+      myChart.hideLoading();
+    }
+  }
+};
+
+onMounted(() => {
+  fetchSummary();
+  initChart();
+  window.addEventListener('resize', () => {
+    if (myChart) {
+      myChart.resize();
+    }
+  });
+});
+
+onUnmounted(() => {
+  if (myChart) {
+    myChart.dispose();
+  }
+});
+</script>
+
+<style scoped>
+.stat-card {
+  display: flex;
+  align-items: center;
+}
+.stat-card .el-icon {
+  font-size: 48px;
+  margin-right: 20px;
+}
+.icon-user { color: #409EFF; }
+.icon-product { color: #67C23A; }
+.icon-order { color: #E6A23C; }
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+.stat-title {
+  font-size: 16px;
+  color: #909399;
+  margin-bottom: 5px;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+</style>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.trade.mapper.RatingMapper">
+
+    <!-- 这个文件只应该包含与 Rating 相关的 SQL -->
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ratings(order_id, rater_id, ratee_id, score, comment)
+        VALUES(#{orderId}, #{raterId}, #{rateeId}, #{score}, #{comment})
+    </insert>
+
+    <select id="findByOrderAndRater" resultType="com.campus.trade.entity.Rating">
+        SELECT * FROM ratings WHERE order_id = #{orderId} AND rater_id = #{raterId}
+    </select>
+
+    <select id="findByRateeId" resultType="com.campus.trade.entity.Rating">
+        SELECT
+            r.*,
+            u.nickname as raterNickname,
+            u.avatar as raterAvatar,
+            p.id as productId,
+            p.title as productTitle
+        FROM ratings r
+                 JOIN user u ON r.rater_id = u.id
+                 JOIN orders o ON r.order_id = o.id
+                 JOIN product p ON o.product_id = p.id
+        WHERE r.ratee_id = #{rateeId}
+        ORDER BY r.create_time DESC
+    </select>
+</mapper>

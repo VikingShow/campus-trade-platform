@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.trade.mapper.OrderMapper">
+
+    <resultMap id="OrderWithDetails" type="com.campus.trade.entity.Order">
+        <id property="id" column="id"/>
+        <result property="productId" column="product_id"/>
+        <result property="buyerId" column="buyer_id"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="createTime" column="create_time"/>
+        <result property="productTitle" column="product_title"/>
+        <result property="productImage" column="cover_image"/>
+        <result property="buyerNickname" column="buyer_nickname"/>
+        <result property="sellerNickname" column="seller_nickname"/>
+        <result property="meetupLocationName" column="location_name"/>
+    </resultMap>
+
+    <sql id="orderJoins">
+        FROM orders o
+        JOIN product p ON o.product_id = p.id
+        JOIN `user` buyer ON o.buyer_id = buyer.id
+        JOIN `user` seller ON o.seller_id = seller.id
+        LEFT JOIN meetup_location ml ON o.meetup_location_id = ml.id
+    </sql>
+
+    <select id="findOrderById" resultMap="OrderWithDetails">
+        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, seller.nickname as seller_nickname, ml.name as location_name
+        <include refid="orderJoins"/>
+        WHERE o.id = #{orderId}
+    </select>
+
+    <select id="findOrdersByBuyerId" resultMap="OrderWithDetails">
+        SELECT o.*, p.title as product_title, p.cover_image, seller.nickname as seller_nickname, ml.name as location_name
+        <include refid="orderJoins"/>
+        WHERE o.buyer_id = #{buyerId}
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="findOrdersBySellerId" resultMap="OrderWithDetails">
+        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, ml.name as location_name
+        <include refid="orderJoins"/>
+        WHERE o.seller_id = #{sellerId}
+        ORDER BY o.create_time DESC
+    </select>
+
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders(product_id, buyer_id, seller_id, order_status, total_price, delivery_method, meetup_location_id, meetup_time_slot)
+        VALUES(#{productId}, #{buyerId}, #{sellerId}, #{orderStatus}, #{totalPrice}, #{deliveryMethod}, #{meetupLocationId}, #{meetupTimeSlot})
+    </insert>
+
+    <update id="updateOrderStatus">
+        UPDATE orders SET order_status = #{status} WHERE id = #{orderId}
+    </update>
+
+    <!-- 【新增】管理员查询所有订单的SQL -->
+    <select id="findAllForAdmin" resultMap="OrderWithDetails">
+        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, seller.nickname as seller_nickname, ml.name as location_name
+        <include refid="orderJoins"/>
+        <where>
+            <if test="orderId != null and orderId != ''">
+                o.id = #{orderId}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="countTotalOrders" resultType="long">
+        SELECT COUNT(*) FROM orders
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.trade.mapper.MessageMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO messages(sender_id, receiver_id, product_id, content)
+        VALUES(#{senderId}, #{receiverId}, #{productId}, #{content})
+    </insert>
+
+    <select id="findMessagesBetweenUsers" resultType="com.campus.trade.entity.Message">
+        SELECT * FROM messages
+        WHERE (sender_id = #{userId1} AND receiver_id = #{userId2})
+           OR (sender_id = #{userId2} AND receiver_id = #{userId1})
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 【新增】获取会话列表的复杂查询 -->
+    <select id="findConversationsByUserId" resultType="com.campus.trade.dto.ConversationDTO">
+        SELECT
+            other_user.id as otherUserId,
+            other_user.nickname as otherUserNickname,
+            other_user.avatar as otherUserAvatar,
+            m.content as lastMessageContent,
+            m.create_time as lastMessageCreateTime
+        FROM messages m
+                 INNER JOIN (
+            SELECT
+                IF(sender_id = #{userId}, receiver_id, sender_id) as other_user_id,
+                MAX(create_time) as max_create_time
+            FROM messages
+            WHERE sender_id = #{userId} OR receiver_id = #{userId}
+            GROUP BY other_user_id
+        ) as latest_msg
+                            ON ((m.sender_id = #{userId} AND m.receiver_id = latest_msg.other_user_id) OR (m.sender_id = latest_msg.other_user_id AND m.receiver_id = #{userId}))
+                                AND m.create_time = latest_msg.max_create_time
+                 JOIN user as other_user ON other_user.id = latest_msg.other_user_id
+        ORDER BY m.create_time DESC
+    </select>
+</mapper>
