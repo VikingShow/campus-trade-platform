@@ -7,6 +7,7 @@ import com.campus.trade.entity.Product;
 import com.campus.trade.exception.CustomException;
 import com.campus.trade.mapper.OrderMapper;
 import com.campus.trade.mapper.ProductMapper;
+import com.campus.trade.service.NotificationService;
 import com.campus.trade.service.OrderService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -15,18 +16,27 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Objects;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired private OrderMapper orderMapper;
-    @Autowired private ProductMapper productMapper;
+    private final OrderMapper orderMapper;
+    private final ProductMapper productMapper;
+    private final NotificationService notificationService;
+
+    @Autowired
+    public OrderServiceImpl(OrderMapper orderMapper, ProductMapper productMapper, NotificationService notificationService) {
+        this.orderMapper = orderMapper;
+        this.productMapper = productMapper;
+        this.notificationService = notificationService;
+    }
 
     @Override
     @Transactional
-    @CacheEvict(value = {"product", "products"}, allEntries = true)
+    @CacheEvict(value = {"products", "product::*"}, allEntries = true)
     public Order createOrder(String buyerId, CreateOrderDTO createOrderDTO) {
         Product product = productMapper.findProductById(createOrderDTO.getProductId());
         if (product == null) throw new CustomException("商品不存在");
@@ -42,9 +52,13 @@ public class OrderServiceImpl implements OrderService {
         order.setDeliveryMethod("ON_CAMPUS_MEETUP");
         order.setMeetupLocationId(createOrderDTO.getMeetupLocationId());
         order.setMeetupTimeSlot(createOrderDTO.getMeetupTimeSlot());
-        orderMapper.insertOrder(order);
 
+        orderMapper.insertOrder(order);
         productMapper.updateProductStatus(product.getId(), "SOLD");
+
+        String notificationContent = String.format("您发布的商品 “%s” 已被购买！", product.getTitle());
+        notificationService.createNotification(product.getSellerId(), "NEW_ORDER", notificationContent, order.getId());
+
         return orderMapper.findOrderById(order.getId());
     }
 
@@ -90,7 +104,6 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.findOrderById(orderId);
     }
 
-    // 【新增】为管理员查询所有订单的方法实现
     @Override
     public PageResult<Order> findAllOrdersForAdmin(String orderId, Integer page, Integer size) {
         PageHelper.startPage(page, size);
