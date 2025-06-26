@@ -2,8 +2,8 @@
   <el-container class="main-layout">
     <el-header class="header">
       <div class="logo-area" @click="$router.push('/')">
-        <el-icon :size="30" color="#409EFC"><School /></el-icon>
-        <span class="logo-title">校园二手市场</span>
+        <el-icon :size="30" color="#67C23A"><SwitchFilled /></el-icon>
+        <span class="logo-title">又又</span>
       </div>
       <div class="menu-area">
          <el-menu mode="horizontal" :router="true" :default-active="$route.path" background-color="transparent" :ellipsis="false">
@@ -41,7 +41,7 @@
 import { useAuthStore } from './stores/authStore';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { UserFilled, School } from '@element-plus/icons-vue';
+import { UserFilled, SwitchFilled } from '@element-plus/icons-vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -79,7 +79,7 @@ body {
   cursor: pointer;
 }
 .logo-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   margin-left: 10px;
 }

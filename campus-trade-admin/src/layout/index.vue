@@ -1,7 +1,7 @@
 <template>
   <el-container class="admin-layout">
-    <el-aside width="200px" class="sidebar">
-      <div class="logo">校园后台管理</div>
+    <el-aside width="220px" class="sidebar">
+      <div class="logo">2Hand 后台管理</div>
       <el-menu :default-active="$route.path" router background-color="#304156" text-color="#bfcbd9" active-text-color="#409EFF">
         <el-menu-item index="/dashboard">
           <el-icon><DataLine /></el-icon>
