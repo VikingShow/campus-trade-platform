@@ -19,3 +19,8 @@ export const updateProduct = (id, data) => {
 export const updateProductStatus = (id, status) => {
   return apiClient.put(`/products/${id}/status`, { status });
 };
+
+// 【新增】获取商品推荐的API函数
+export const getRecommendations = (productId) => {
+    return apiClient.get(`/products/${productId}/recommendations`);
+};

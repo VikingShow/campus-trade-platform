@@ -105,4 +105,12 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = (Page<Product>) productMapper.findAllForAdmin(keyword);
         return new PageResult<>(productPage);
     }
+
+    // 【新增】获取推荐商品的方法实现
+    @Override
+    @Cacheable(value = "recommendations", key = "#productId") // 对推荐结果进行缓存
+    public List<Product> getRecommendedProducts(String productId) {
+        // 推荐5个商品
+        return productMapper.findRecommendedProducts(productId, 5);
+    }
 }

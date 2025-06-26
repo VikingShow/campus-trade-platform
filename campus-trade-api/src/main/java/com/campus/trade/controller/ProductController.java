@@ -53,4 +53,12 @@ public class ProductController {
         productService.updateProductStatus(id, status, getUserId(user));
         return Result.success();
     }
+
+    /**
+     * 【新增】获取商品推荐的公开接口
+     */
+    @GetMapping("/{id}/recommendations")
+    public Result<List<Product>> getRecommendations(@PathVariable String id) {
+        return Result.success(productService.getRecommendedProducts(id));
+    }
 }
