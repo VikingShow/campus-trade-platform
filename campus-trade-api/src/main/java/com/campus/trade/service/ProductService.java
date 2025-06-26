@@ -5,7 +5,8 @@ import com.campus.trade.entity.Product;
 import java.util.List;
 
 public interface ProductService {
-    List<Product> getProducts(String keyword, String categoryId);
+    // 【修改】getProducts 方法签名
+    List<Product> getProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String orderBy);
     Product getProductById(String productId);
     Product createProduct(Product product, String sellerId);
     Product updateProduct(Product product, String currentUserId);

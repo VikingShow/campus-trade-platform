@@ -1,33 +1,54 @@
 <template>
   <el-container>
     <el-main>
-      <!-- Search and Filter Bar -->
-      <el-row :gutter="20" style="margin-bottom: 20px;">
-        <el-col :span="18">
-           <el-input v-model="searchQuery" placeholder="搜索你感兴趣的宝贝..." clearable @clear="fetchProducts" @keyup.enter="fetchProducts">
+      <!-- 筛选与排序工具栏 -->
+      <el-card class="filter-card" shadow="never">
+        <el-row :gutter="20" align="middle">
+          <!-- 关键词搜索 -->
+          <el-col :span="10">
+            <el-input v-model="filters.keyword" placeholder="搜索你感兴趣的宝贝..." clearable @clear="handleFilterChange" @keyup.enter="handleFilterChange">
               <template #append>
-                <el-button :icon="Search" @click="fetchProducts" />
+                <el-button :icon="Search" @click="handleFilterChange" />
               </template>
-           </el-input>
-        </el-col>
-        <el-col :span="6">
-          <el-select v-model="selectedCategory" placeholder="按分类筛选" style="width: 100%;" @change="fetchProducts" clearable>
-            <el-option label="全部分类" value=""></el-option>
-            <el-option 
-              v-for="category in categories" 
-              :key="category.id" 
-              :label="category.name" 
-              :value="category.id"
-            />
-          </el-select>
-        </el-col>
-      </el-row>
+            </el-input>
+          </el-col>
+
+          <!-- 分类筛选 -->
+          <el-col :span="4">
+            <el-select v-model="filters.categoryId" placeholder="全部分类" style="width: 100%;" @change="handleFilterChange" clearable>
+              <el-option 
+                v-for="category in categories" 
+                :key="category.id" 
+                :label="category.name" 
+                :value="category.id"
+              />
+            </el-select>
+          </el-col>
+
+          <!-- 价格区间筛选 -->
+          <el-col :span="6">
+            <div class="price-range">
+              <el-input-number v-model="filters.minPrice" :min="0" :precision="2" controls-position="right" placeholder="最低价" style="flex: 1;" @change="handleFilterChange" />
+              <span class="price-separator">-</span>
+              <el-input-number v-model="filters.maxPrice" :min="filters.minPrice || 0" :precision="2" controls-position="right" placeholder="最高价" style="flex: 1;" @change="handleFilterChange" />
+            </div>
+          </el-col>
+          
+          <!-- 排序方式 -->
+          <el-col :span="4">
+            <el-select v-model="filters.orderBy" style="width: 100%;" @change="handleFilterChange">
+              <el-option label="最新发布" value="latest"></el-option>
+              <el-option label="价格从低到高" value="price_asc"></el-option>
+              <el-option label="价格从高到低" value="price_desc"></el-option>
+            </el-select>
+          </el-col>
+        </el-row>
+      </el-card>
       
-      <!-- Products List -->
-      <el-row :gutter="20" v-loading="loading">
+      <!-- 商品列表 -->
+      <el-row :gutter="20" v-loading="loading" style="margin-top: 20px;">
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in products" :key="product.id" style="margin-bottom: 20px;">
           <el-card shadow="hover" class="product-card" @click="goToDetail(product.id)">
-             <!-- 【最终修正】重新使用 fullImageUrl 函数来正确拼接图片路径 -->
              <img :src="fullImageUrl(product.coverImage)" class="product-image" alt="商品图片" @error="onImageError"/>
              <div class="product-info">
                <p class="product-title">{{ product.title }}</p>
@@ -45,34 +66,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 import { getProducts } from '../api/product';
 import apiClient from '../api/axios.config';
+import { debounce } from '../utils/debounce';
 
 const router = useRouter();
 const products = ref([]);
 const categories = ref([]);
 const loading = ref(false);
-const searchQuery = ref('');
-const selectedCategory = ref('');
 
-// 【最终修正】恢复 backendUrl 和 fullImageUrl 函数的定义
+const filters = reactive({
+  keyword: '',
+  categoryId: '',
+  minPrice: undefined,
+  maxPrice: undefined,
+  orderBy: 'latest',
+});
+
 const backendUrl = 'http://localhost:8080';
 const fullImageUrl = (relativePath) => {
-    if (!relativePath) return ''; // 如果路径为空，返回空字符串
-    if (relativePath.startsWith('http')) return relativePath; // 如果已经是完整URL，直接返回
-    return `${backendUrl}${relativePath}`; // 否则，拼接成完整URL
+    if (!relativePath) return '';
+    return `${backendUrl}${relativePath}`;
 };
 
 const fetchProducts = async () => {
     loading.value = true;
     try {
-        const params = {
-            keyword: searchQuery.value,
-            categoryId: selectedCategory.value,
-        };
+        const params = {};
+        for (const key in filters) {
+            if (filters[key] !== '' && filters[key] !== undefined && filters[key] !== null) {
+                params[key] = filters[key];
+            }
+        }
         const response = await getProducts(params);
         products.value = response.data.data;
     } catch (error) {
@@ -82,6 +110,7 @@ const fetchProducts = async () => {
     }
 };
 
+// 【最终修正】补全 fetchCategories 函数的完整逻辑
 const fetchCategories = async () => {
     try {
         const response = await apiClient.get('/categories');
@@ -91,13 +120,12 @@ const fetchCategories = async () => {
     }
 };
 
-const goToDetail = (id) => {
-    router.push(`/product/${id}`);
-};
+const goToDetail = (id) => { router.push(`/product/${id}`); };
+const onImageError = (e) => { e.target.src = 'https://placehold.co/400x300/e8e8e8/969696?text=Image+Not+Found'; };
 
-const onImageError = (e) => {
-    e.target.src = 'https://placehold.co/400x300/e8e8e8/969696?text=Image+Not+Found';
-};
+const handleFilterChange = debounce(() => {
+    fetchProducts();
+}, 500);
 
 onMounted(() => {
     fetchProducts();
@@ -106,6 +134,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.filter-card {
+    margin-bottom: 20px;
+}
+.price-range {
+    display: flex;
+    align-items: center;
+}
+.price-separator {
+    margin: 0 10px;
+    color: #909399;
+}
 .product-card { cursor: pointer; }
 .product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 4px; }
 .product-info { padding: 14px; }

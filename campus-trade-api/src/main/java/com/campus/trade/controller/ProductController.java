@@ -22,11 +22,15 @@ public class ProductController {
         return user.getUserId();
     }
 
+    // 【修改】getProducts 接口，增加接收 minPrice, maxPrice, orderBy 参数
     @GetMapping
     public Result<List<Product>> getProducts(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String categoryId) {
-        return Result.success(productService.getProducts(keyword, categoryId));
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "latest") String orderBy) {
+        return Result.success(productService.getProducts(keyword, categoryId, minPrice, maxPrice, orderBy));
     }
 
     @GetMapping("/{id}")

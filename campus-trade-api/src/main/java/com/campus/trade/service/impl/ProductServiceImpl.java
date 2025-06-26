@@ -28,11 +28,11 @@ public class ProductServiceImpl implements ProductService {
         this.productMapper = productMapper;
     }
 
+    // 【修改】getProducts 方法实现，传递所有参数
     @Override
-    @Cacheable("products") // 对商品列表查询开启缓存
-    public List<Product> getProducts(String keyword, String categoryId) {
-        log.info(">>> [缓存未命中] 正在从数据库查询商品列表...");
-        return productMapper.findProducts(keyword, categoryId);
+    @Cacheable("products")
+    public List<Product> getProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String orderBy) {
+        return productMapper.findProducts(keyword, categoryId, minPrice, maxPrice, orderBy);
     }
 
     /**

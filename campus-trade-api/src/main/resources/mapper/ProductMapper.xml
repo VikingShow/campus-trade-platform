@@ -28,6 +28,7 @@
 
     <!-- 所有使用了 <include refid="productColumns"/> 的 <select> 语句都会自动应用此修改 -->
 
+    <!-- 【修改】findProducts 查询，加入价格区间和动态排序逻辑 -->
     <select id="findProducts" resultMap="ProductWithSeller">
         SELECT <include refid="productColumns"/>
         FROM product p JOIN user u ON p.seller_id = u.id
@@ -38,7 +39,23 @@
         <if test="categoryId != null and categoryId != ''">
             AND p.category_id = #{categoryId}
         </if>
-        ORDER BY p.create_time DESC
+        <if test="minPrice != null">
+            AND p.price >= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND p.price &lt;= #{maxPrice}
+        </if>
+        <choose>
+            <when test="orderBy == 'price_asc'">
+                ORDER BY p.price ASC, p.create_time DESC
+            </when>
+            <when test="orderBy == 'price_desc'">
+                ORDER BY p.price DESC, p.create_time DESC
+            </when>
+            <otherwise>
+                ORDER BY p.create_time DESC
+            </otherwise>
+        </choose>
     </select>
 
     <select id="findProductById" resultMap="ProductWithSeller">

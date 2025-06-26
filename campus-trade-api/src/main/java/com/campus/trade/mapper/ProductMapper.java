@@ -7,7 +7,12 @@ import java.util.List;
 
 @Mapper
 public interface ProductMapper {
-    List<Product> findProducts(@Param("keyword") String keyword, @Param("categoryId") String categoryId);
+    List<Product> findProducts(@Param("keyword") String keyword,
+                               @Param("categoryId") Integer categoryId,
+                               @Param("minPrice") Double minPrice,
+                               @Param("maxPrice") Double maxPrice,
+                               @Param("orderBy") String orderBy);
+
     Product findProductById(String productId);
     void insertProduct(Product product);
     void updateProduct(Product product);
