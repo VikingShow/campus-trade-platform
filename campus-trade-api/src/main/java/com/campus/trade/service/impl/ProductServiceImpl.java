@@ -1,9 +1,12 @@
 package com.campus.trade.service.impl;
 
+import com.campus.trade.dto.PageResult;
 import com.campus.trade.entity.Product;
 import com.campus.trade.exception.CustomException;
 import com.campus.trade.mapper.ProductMapper;
 import com.campus.trade.service.ProductService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,8 +98,11 @@ public class ProductServiceImpl implements ProductService {
         productMapper.updateProductStatus(productId, status);
     }
 
+
     @Override
-    public List<Product> findAllProductsForAdmin(String keyword) {
-        return productMapper.findAllForAdmin(keyword);
+    public PageResult<Product> findAllProductsForAdmin(String keyword, Integer page, Integer size) {
+        PageHelper.startPage(page, size);
+        Page<Product> productPage = (Page<Product>) productMapper.findAllForAdmin(keyword);
+        return new PageResult<>(productPage);
     }
 }

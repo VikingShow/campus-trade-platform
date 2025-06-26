@@ -56,11 +56,26 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 【新增】分页组件 -->
+    <div class="pagination-container">
+      <el-pagination
+        background
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pagination.total"
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.size"
+        :page-sizes="[10, 20, 50]"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { getAllProductsAdmin, updateProductStatusAdmin } from '../../api/admin';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
@@ -68,6 +83,13 @@ import { Search } from '@element-plus/icons-vue';
 const products = ref([]);
 const loading = ref(false);
 const searchKeyword = ref('');
+
+// 【新增】分页相关的状态数据
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0,
+});
 
 const backendUrl = 'http://localhost:8080';
 
@@ -80,14 +102,30 @@ const fullImageUrl = (relativePath) => {
 const fetchProducts = async () => {
   loading.value = true;
   try {
-    const params = { keyword: searchKeyword.value };
+    const params = { 
+      keyword: searchKeyword.value,
+      page: pagination.page,
+      size: pagination.size,
+    };
     const response = await getAllProductsAdmin(params);
-    products.value = response.data.data;
+    products.value = response.data.data.list;
+    pagination.total = response.data.data.total;
   } catch (error) {
     ElMessage.error('加载商品列表失败');
   } finally {
     loading.value = false;
   }
+};
+
+const handleSizeChange = (newSize) => {
+  pagination.size = newSize;
+  pagination.page = 1;
+  fetchProducts();
+};
+
+const handleCurrentChange = (newPage) => {
+  pagination.page = newPage;
+  fetchProducts();
 };
 
 const handleDelist = (row) => {
@@ -99,7 +137,7 @@ const handleDelist = (row) => {
     try {
       await updateProductStatusAdmin(row.id, 'DELISTED');
       ElMessage.success('商品已下架');
-      fetchProducts(); // 重新加载列表
+      fetchProducts();
     } catch (error) {
       ElMessage.error('操作失败');
     }
@@ -120,5 +158,10 @@ onMounted(fetchProducts);
 <style scoped>
 .toolbar {
   margin-bottom: 20px;
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>

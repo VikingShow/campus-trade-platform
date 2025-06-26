@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/',
     component: AdminLayout,
-    redirect: '/dashboard',
+    redirect: { name: 'Dashboard' },
     children: [
       {
         path: 'dashboard',
@@ -48,19 +48,23 @@ const routes = [
   }
 ];
 
-// ... router 创建和 beforeEach 守卫保持不变 ...
 const router = createRouter({
-  history: createWebHistory(),
+  // 使用 import.meta.env.BASE_URL 来自动获取 Vite 配置中的 base 路径
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 });
+
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   if (to.meta.requiresAuth && !authStore.isAdmin) {
-    next({ name: 'Login' });
+    // 明确使用命名路由进行跳转，并传递重定向参数
+    next({ name: 'Login', query: { redirect: to.fullPath } });
   } else if (to.meta.guest && authStore.isAdmin) {
     next({ name: 'Dashboard' });
   } else {
     next();
   }
 });
+
+// 【关键修正】将 router 实例导出，以便其他文件可以导入和使用它
 export default router;

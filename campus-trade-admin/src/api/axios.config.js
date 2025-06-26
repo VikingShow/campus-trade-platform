@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 import { ElMessage } from 'element-plus';
+// 【最终修正】不再导入 router，打破循环依赖
+// import router from '../router'; 
 
 const apiClient = axios.create({
   baseURL: '/api',
@@ -31,9 +33,9 @@ apiClient.interceptors.response.use(
       const { status, data } = error.response;
       if (status === 401 || status === 403) {
         const authStore = useAuthStore();
-        authStore.logout();
-        window.location.href = '/login';
-        ElMessage.error(data.msg || '认证失败或无权限访问');
+        // 【最终修正】拦截器只负责调用 logout，不再负责导航
+        authStore.logout(); 
+        ElMessage.error(data.msg || '认证失败或无权限访问，请重新登录');
       } else {
         ElMessage.error(data.msg || '服务器发生错误');
       }

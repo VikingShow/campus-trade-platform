@@ -3,11 +3,14 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  // 指定应用的基础路径为 /admin/
+  // 这将确保所有打包后的资源引用都是以 /admin/ 开头的相对路径
+  base: '/admin/',
   server: {
-    port: 8000, // 我们为后台管理系统使用一个新端口 8000
+    port: 8000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // 后端服务地址保持不变
+        target: 'http://localhost:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

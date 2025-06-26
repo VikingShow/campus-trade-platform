@@ -10,6 +10,9 @@ import com.campus.trade.mapper.UserMapper;
 import com.campus.trade.security.AuthenticatedUser;
 import com.campus.trade.security.JwtUtil;
 import com.campus.trade.service.UserService;
+import com.campus.trade.dto.PageResult; // 【新增】
+import com.github.pagehelper.Page; // 【新增】
+import com.github.pagehelper.PageHelper; // 【新增】
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -76,10 +79,6 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
-    @Override
-    public List<User> findAllUsers() {
-        return userMapper.findAll();
-    }
 
     @Override
     public User updateUserStatus(String userId, Integer status) {
@@ -108,5 +107,15 @@ public class UserServiceImpl implements UserService {
         userMapper.updateProfile(userToUpdate);
         // 返回更新后的完整用户信息
         return userMapper.findById(userId);
+    }
+
+    @Override
+    public PageResult<User> findAllUsers(Integer page, Integer size) {
+        // 1. 设置分页参数
+        PageHelper.startPage(page, size);
+        // 2. 正常执行查询，PageHelper会自动拦截这条SQL，并为其附加分页逻辑
+        Page<User> userPage = (Page<User>) userMapper.findAll();
+        // 3. 将查询结果封装成我们自定义的 PageResult 对象
+        return new PageResult<>(userPage);
     }
 }

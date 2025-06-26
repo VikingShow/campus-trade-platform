@@ -1,8 +1,8 @@
 import apiClient from './axios.config';
 
 // --- User Management ---
-export const getAllUsers = () => {
-    return apiClient.get('/admin/users');
+export const getAllUsers = (params) => {
+    return apiClient.get('/admin/users', { params });
 };
 export const updateUserStatus = (id, status) => {
     return apiClient.put(`/admin/users/${id}/status`, { status });
@@ -17,6 +17,7 @@ export const updateProductStatusAdmin = (id, status) => {
 };
 
 // --- Order Management ---
+// 【修改】让 getAllOrdersAdmin 函数可以接收分页参数
 export const getAllOrdersAdmin = (params) => {
     return apiClient.get('/admin/orders', { params });
 };
@@ -27,12 +28,10 @@ export const addLocationAdmin = (data) => { return apiClient.post('/admin/locati
 export const updateLocationAdmin = (id, data) => { return apiClient.put(`/admin/locations/${id}`, data); };
 export const deleteLocationAdmin = (id) => { return apiClient.delete(`/admin/locations/${id}`); };
 
-
-// --- 【新增】Dashboard Stats ---
+// --- Dashboard Stats ---
 export const getSummaryStats = () => {
     return apiClient.get('/admin/stats/summary');
 };
-
 export const getDailyRegistrationStats = () => {
     return apiClient.get('/admin/stats/daily-registrations');
 };

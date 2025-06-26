@@ -4,7 +4,7 @@
     <div class="toolbar">
       <el-input
         v-model="searchOrderId"
-        placeholder="按订单ID搜索"
+        placeholder="按订单ID精确搜索"
         clearable
         @clear="fetchOrders"
         @keyup.enter="fetchOrders"
@@ -49,11 +49,25 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 【新增】分页组件 -->
+    <div class="pagination-container">
+        <el-pagination
+            background
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="pagination.total"
+            v-model:current-page="pagination.page"
+            v-model:page-size="pagination.size"
+            :page-sizes="[10, 20, 50]"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+        />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { getAllOrdersAdmin } from '../../api/admin';
 import { ElMessage } from 'element-plus';
 import { Search } from '@element-plus/icons-vue';
@@ -61,6 +75,13 @@ import { Search } from '@element-plus/icons-vue';
 const orders = ref([]);
 const loading = ref(false);
 const searchOrderId = ref('');
+
+// 【新增】分页相关的状态数据
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0,
+});
 
 const backendUrl = 'http://localhost:8080';
 
@@ -73,14 +94,30 @@ const fullImageUrl = (relativePath) => {
 const fetchOrders = async () => {
   loading.value = true;
   try {
-    const params = { orderId: searchOrderId.value };
+    const params = { 
+        orderId: searchOrderId.value,
+        page: pagination.page,
+        size: pagination.size,
+    };
     const response = await getAllOrdersAdmin(params);
-    orders.value = response.data.data;
+    orders.value = response.data.data.list;
+    pagination.total = response.data.data.total;
   } catch (error) {
     ElMessage.error('加载订单列表失败');
   } finally {
     loading.value = false;
   }
+};
+
+const handleSizeChange = (newSize) => {
+  pagination.size = newSize;
+  pagination.page = 1;
+  fetchOrders();
+};
+
+const handleCurrentChange = (newPage) => {
+  pagination.page = newPage;
+  fetchOrders();
 };
 
 const statusMap = {
@@ -97,5 +134,10 @@ onMounted(fetchOrders);
 <style scoped>
 .toolbar {
   margin-bottom: 20px;
+}
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>

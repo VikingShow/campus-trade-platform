@@ -1,12 +1,15 @@
 package com.campus.trade.service.impl;
 
 import com.campus.trade.dto.CreateOrderDTO;
+import com.campus.trade.dto.PageResult;
 import com.campus.trade.entity.Order;
 import com.campus.trade.entity.Product;
 import com.campus.trade.exception.CustomException;
 import com.campus.trade.mapper.OrderMapper;
 import com.campus.trade.mapper.ProductMapper;
 import com.campus.trade.service.OrderService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -89,7 +92,9 @@ public class OrderServiceImpl implements OrderService {
 
     // 【新增】为管理员查询所有订单的方法实现
     @Override
-    public List<Order> findAllOrdersForAdmin(String orderId) {
-        return orderMapper.findAllForAdmin(orderId);
+    public PageResult<Order> findAllOrdersForAdmin(String orderId, Integer page, Integer size) {
+        PageHelper.startPage(page, size);
+        Page<Order> orderPage = (Page<Order>) orderMapper.findAllForAdmin(orderId);
+        return new PageResult<>(orderPage);
     }
 }

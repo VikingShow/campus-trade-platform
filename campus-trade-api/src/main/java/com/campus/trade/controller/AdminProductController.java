@@ -1,6 +1,7 @@
 package com.campus.trade.controller;
 
 import com.campus.trade.common.Result;
+import com.campus.trade.dto.PageResult;
 import com.campus.trade.entity.Product;
 import com.campus.trade.security.AuthenticatedUser;
 import com.campus.trade.service.ProductService;
@@ -26,8 +27,11 @@ public class AdminProductController {
 
     // 获取所有商品列表（带搜索）
     @GetMapping
-    public Result<List<Product>> getAllProducts(@RequestParam(required = false) String keyword) {
-        return Result.success(productService.findAllProductsForAdmin(keyword));
+    public Result<PageResult<Product>> getAllProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return Result.success(productService.findAllProductsForAdmin(keyword, page, size));
     }
 
     // 更新商品状态（复用现有Service方法，但通过此接口暴露给管理员）

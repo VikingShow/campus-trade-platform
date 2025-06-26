@@ -1,16 +1,17 @@
 package com.campus.trade.controller;
 
 import com.campus.trade.common.Result;
+import com.campus.trade.dto.PageResult; // 【新增】
 import com.campus.trade.entity.User;
 import com.campus.trade.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize; // 【新增】导入权限注解
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/admin/users")
-@PreAuthorize("hasRole('ADMIN')") // 【关键】保护整个Controller，只有ADMIN角色能访问
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UserService userService;
@@ -20,9 +21,15 @@ public class AdminController {
         this.userService = userService;
     }
 
+    /**
+     * 【修改】增加 page 和 size 参数，用于接收前端的分页请求
+     */
     @GetMapping
-    public Result<List<User>> getAllUsers() {
-        return Result.success(userService.findAllUsers());
+    public Result<PageResult<User>> getAllUsers(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        PageResult<User> userPage = userService.findAllUsers(page, size);
+        return Result.success(userPage);
     }
 
     @PutMapping("/{id}/status")

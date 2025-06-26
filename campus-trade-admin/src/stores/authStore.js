@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('adminAuth', () => {
         localStorage.setItem('adminRoles', JSON.stringify(roles.value));
     }
 
-    function logout() {
+     function logout() {
         token.value = null;
         user.value = null;
         roles.value = [];
