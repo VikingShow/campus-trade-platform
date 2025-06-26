@@ -85,19 +85,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @CacheEvict(value = {"product", "products"}, key = "#productId", allEntries = true)
+    @CacheEvict(value = {"product::#productId", "products"}, allEntries = true)
     public void updateProductStatus(String productId, String status, String currentUserId) {
         Product existingProduct = productMapper.findProductById(productId);
         if (existingProduct == null) {
             throw new CustomException("商品不存在");
         }
+        // 这个方法现在只给普通用户使用，所以只检查所有权
         if (!Objects.equals(existingProduct.getSellerId(), currentUserId)) {
-            // 在实际项目中，这里应该加入对管理员角色的判断
             throw new CustomException("无权修改他人的商品");
         }
         productMapper.updateProductStatus(productId, status);
     }
 
+    // 【新增】管理员调用的方法，直接更新状态，不再进行用户ID的比较
+    @Override
+    @CacheEvict(value = {"product::#productId", "products"}, allEntries = true)
+    public void updateProductStatusAsAdmin(String productId, String status) {
+        productMapper.updateProductStatus(productId, status);
+    }
 
     @Override
     public PageResult<Product> findAllProductsForAdmin(String keyword, Integer page, Integer size) {

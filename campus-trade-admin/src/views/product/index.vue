@@ -22,7 +22,7 @@
         <template #default="scope">
           <div style="display: flex; align-items: center;">
             <el-image 
-              :src="fullImageUrl(scope.row.coverImage)" 
+              :src=scope.row.coverImage
               fit="cover" 
               style="width: 60px; height: 60px; border-radius: 4px; flex-shrink: 0;"
               lazy
@@ -91,13 +91,13 @@ const pagination = reactive({
   total: 0,
 });
 
-const backendUrl = 'http://localhost:8080';
+// const backendUrl = 'http://localhost:8080';
 
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const fetchProducts = async () => {
   loading.value = true;

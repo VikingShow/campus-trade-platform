@@ -34,15 +34,13 @@ public class AdminProductController {
         return Result.success(productService.findAllProductsForAdmin(keyword, page, size));
     }
 
-    // 更新商品状态（复用现有Service方法，但通过此接口暴露给管理员）
+    // 【修改】调用新的、专门为管理员设计的 service 方法
     @PutMapping("/{id}/status")
     public Result<Void> updateProductStatus(
             @PathVariable String id,
-            @RequestBody Map<String, String> payload,
-            @AuthenticationPrincipal AuthenticatedUser user) {
+            @RequestBody Map<String, String> payload) {
         String status = payload.get("status");
-        // 调用service时，传入管理员的ID，service层可以根据角色进一步判断权限
-        productService.updateProductStatus(id, status, user.getUserId());
+        productService.updateProductStatusAsAdmin(id, status);
         return Result.success();
     }
 }

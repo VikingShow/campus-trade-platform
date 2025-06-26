@@ -17,4 +17,7 @@ public interface ProductService {
 
     // 【新增】获取推荐商品的方法声明
     List<Product> getRecommendedProducts(String productId);
+
+    // 【新增】一个专门给管理员使用的、无权限检查的方法
+    void updateProductStatusAsAdmin(String productId, String status);
 }
