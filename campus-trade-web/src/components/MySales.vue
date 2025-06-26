@@ -5,7 +5,7 @@
       <el-table-column label="商品" min-width="200">
         <template #default="scope">
            <div style="display: flex; align-items: center; cursor: pointer;" @click="goToProduct(scope.row.productId)">
-            <el-image :src="fullImageUrl(scope.row.productImage)" fit="cover" style="width: 60px; height: 60px; border-radius: 4px; flex-shrink: 0;"></el-image>
+            <el-image :src=scope.row.productImage fit="cover" style="width: 60px; height: 60px; border-radius: 4px; flex-shrink: 0;"></el-image>
             <span style="margin-left: 10px">{{ scope.row.productTitle }}</span>
           </div>
         </template>
@@ -40,13 +40,13 @@ const router = useRouter();
 const orders = ref([]);
 const loading = ref(false);
 
-const backendUrl = 'http://localhost:8080';
+// const backendUrl = 'http://localhost:8080';
 
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const fetchOrders = async () => {
   loading.value = true;

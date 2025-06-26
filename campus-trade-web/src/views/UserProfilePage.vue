@@ -2,7 +2,7 @@
   <div v-if="!loading && user" class="user-profile">
     <el-card>
       <div class="profile-header">
-        <el-avatar :size="80" :src="fullImageUrl(user.avatar)" icon="UserFilled" />
+        <el-avatar :size="80" :src=user.avatar icon="UserFilled" />
         <div class="profile-info">
           <h2>{{ user.nickname }}</h2>
           <el-tag effect="dark" round size="large">
@@ -20,7 +20,7 @@
       <div v-if="ratings.length > 0">
         <div v-for="rating in ratings" :key="rating.id" class="rating-item">
           <div class="rating-header">
-            <el-avatar :size="40" :src="fullImageUrl(rating.raterAvatar)" icon="UserFilled" />
+            <el-avatar :size="40" :src=rating.raterAvatar icon="UserFilled" />
             <span class="rater-name">{{ rating.raterNickname }}</span>
             <el-rate v-model="rating.score" disabled style="margin-left: auto;" />
           </div>
@@ -53,13 +53,13 @@ const user = ref(null);
 const ratings = ref([]);
 const loading = ref(true);
 
-const backendUrl = 'http://localhost:8080';
+// const backendUrl = 'http://localhost:8080';
 
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 onMounted(async () => {
   loading.value = true;

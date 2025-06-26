@@ -5,7 +5,7 @@
       <el-descriptions border :column="1" size="large">
         <el-descriptions-item label="商品">
             <div style="display: flex; align-items: center;">
-                <el-image :src="fullImageUrl(product.coverImage)" style="width: 80px; height: 80px; border-radius: 4px;"/>
+                <el-image :src=product.coverImage style="width: 80px; height: 80px; border-radius: 4px;"/>
                 <span style="margin-left: 15px;">{{ product.title }}</span>
             </div>
         </el-descriptions-item>
@@ -52,13 +52,13 @@ const selectedLocation = ref(null);
 const meetupTimeSlot = ref('');
 const submitting = ref(false);
 
-const backendUrl = 'http://localhost:8080';
+// const backendUrl = 'http://localhost:8080';
 
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const fetchProduct = async () => {
     loading.value = true;

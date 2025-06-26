@@ -8,7 +8,7 @@
             <el-descriptions-item label="用户ID">{{ authStore.user?.id }}</el-descriptions-item>
             <el-descriptions-item label="昵称">{{ authStore.user?.nickname }}</el-descriptions-item>
             <el-descriptions-item label="头像">
-                <el-avatar :icon="UserFilled" :src="fullImageUrl(authStore.user?.avatar)" />
+                <el-avatar :icon="UserFilled" :src=authStore.user?.avatar />
             </el-descriptions-item>
         </el-descriptions>
 
@@ -23,7 +23,7 @@
                         :on-success="handleAvatarSuccess"
                         :headers="{ 'Authorization': `Bearer ${authStore.token}` }"
                     >
-                        <img v-if="form.avatar" :src="fullImageUrl(form.avatar)" class="avatar" />
+                        <img v-if="form.avatar" :src=form.avatar class="avatar" />
                         <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
@@ -55,12 +55,12 @@ const form = reactive({
   avatar: '',
 });
 
-const backendUrl = 'http://localhost:8080';
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const backendUrl = 'http://localhost:8080';
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const openDialog = () => {
   form.nickname = authStore.user?.nickname || '';

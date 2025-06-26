@@ -18,7 +18,7 @@
         <div v-if="product" class="product-detail-container">
           <el-row :gutter="30">
             <el-col :md="12">
-              <el-image :src="fullImageUrl(product.coverImage)" fit="cover" class="product-main-image" @error="onImageError">
+              <el-image :src=product.coverImage fit="cover" class="product-main-image" @error="onImageError">
                 <template #placeholder>
                   <div class="image-slot">加载中<span class="dot">...</span></div>
                 </template>
@@ -37,7 +37,7 @@
                 <el-descriptions-item label="发布时间">{{ new Date(product.createTime).toLocaleDateString() }}</el-descriptions-item>
                 <el-descriptions-item label="卖家">
                   <div class="seller-box">
-                    <el-avatar :src="fullImageUrl(product.sellerAvatar)" icon="UserFilled" />
+                    <el-avatar :src=product.sellerAvatar icon="UserFilled" />
                     <router-link :to="`/user/${product.sellerId}`" class="seller-link">
                         <span class="seller-name">{{ product.sellerNickname }}</span>
                     </router-link>
@@ -80,7 +80,7 @@
         <el-row :gutter="20">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="rec in recommendations" :key="rec.id">
                 <el-card shadow="hover" class="product-card" @click="goToDetail(rec.id)">
-                    <img :src="fullImageUrl(rec.coverImage)" class="product-image" alt="推荐商品图片" @error="onImageError"/>
+                    <img :src=rec.coverImage class="product-image" alt="推荐商品图片" @error="onImageError"/>
                     <div class="product-info">
                         <p class="product-title">{{ rec.title }}</p>
                         <div class="bottom">
@@ -113,14 +113,14 @@ const loading = ref(true);
 const recommendations = ref([]);
 
 // 定义后端服务的地址，用于拼接完整的图片URL
-const backendUrl = 'http://localhost:8080';
+// const backendUrl = 'http://localhost:8080';
 
-// 计算完整的图片URL
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// // 计算完整的图片URL
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 // 计算当前登录用户是否是该商品的卖家
 const isOwner = computed(() => {

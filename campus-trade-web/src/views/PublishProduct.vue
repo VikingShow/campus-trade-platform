@@ -13,7 +13,7 @@
           :before-upload="beforeUpload"
           :headers="{ 'Authorization': `Bearer ${authStore.token}` }"
         >
-          <img v-if="fullImageUrl" :src="fullImageUrl" class="product-image" alt="已上传图片"/>
+          <img v-if="form.coverImage" :src="form.coverImage" class="product-image" alt="已上传图片"/>
           <el-icon v-else class="uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
@@ -56,6 +56,7 @@ import { ElMessage } from 'element-plus';
 import { createProduct, getProductById, updateProduct } from '../api/product';
 import apiClient from '../api/axios.config';
 import { Plus } from '@element-plus/icons-vue';
+import ProductDetail from './ProductDetail.vue';
 
 const props = defineProps({ id: String });
 const router = useRouter();

@@ -49,7 +49,7 @@
       <el-row :gutter="20" v-loading="loading" style="margin-top: 20px;">
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in products" :key="product.id" style="margin-bottom: 20px;">
           <el-card shadow="hover" class="product-card" @click="goToDetail(product.id)">
-             <img :src="fullImageUrl(product.coverImage)" class="product-image" alt="商品图片" @error="onImageError"/>
+             <img :src=product.coverImage class="product-image" alt="商品图片" @error="onImageError"/>
              <div class="product-info">
                <p class="product-title">{{ product.title }}</p>
                <div class="bottom">
@@ -86,11 +86,11 @@ const filters = reactive({
   orderBy: 'latest',
 });
 
-const backendUrl = 'http://localhost:8080';
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    return `${backendUrl}${relativePath}`;
-};
+// const backendUrl = 'http://localhost:8080';
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const fetchProducts = async () => {
     loading.value = true;
