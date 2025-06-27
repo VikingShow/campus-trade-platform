@@ -50,7 +50,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 注册
     async function register(data) {
-        return await apiClient.post('/users/register', data);
+        const payload = { ...data };
+        return await apiClient.post('/users/register', payload);
     }
     
     // 更新个人资料
@@ -106,6 +107,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     return { 
         token, user, isAuthenticated, setAuth, logout, login, register, updateUserProfile,
-        favoriteIds, fetchFavoriteIds, addToFavorites, removeFromFavorites // 【新增】导出收藏相关状态和方法
+        favoriteIds, fetchFavoriteIds, addToFavorites, removeFromFavorites
     };
 });

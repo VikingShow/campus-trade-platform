@@ -7,6 +7,9 @@
     <select id="findById" resultType="com.campus.trade.entity.User">
         SELECT * FROM user WHERE id = #{id}
     </select>
+    <select id="findByEmail" resultType="com.campus.trade.entity.User">
+        SELECT * FROM user WHERE email = #{email}
+    </select>
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user(username, password, nickname, role, status)
         VALUES(#{username}, #{password}, #{nickname}, 'USER', 1)

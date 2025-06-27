@@ -10,10 +10,14 @@ import com.campus.trade.mapper.UserMapper;
 import com.campus.trade.security.AuthenticatedUser;
 import com.campus.trade.security.JwtUtil;
 import com.campus.trade.service.UserService;
+import com.campus.trade.service.impl.EmailServiceImpl; // 【新增】
+import org.springframework.data.redis.core.StringRedisTemplate; // 【新增】
+
 import com.campus.trade.dto.PageResult; // 【新增】
 import com.github.pagehelper.Page; // 【新增】
 import com.github.pagehelper.PageHelper; // 【新增】
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,28 +36,49 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final StringRedisTemplate redisTemplate; // 【新增】
+
 
     @Autowired
-    public UserServiceImpl(UserMapper userMapper,
-                           PasswordEncoder passwordEncoder,
-                           AuthenticationManager authenticationManager,
-                           JwtUtil jwtUtil) {
+    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtUtil jwtUtil, StringRedisTemplate redisTemplate) { //【修改】构造函数
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.redisTemplate = redisTemplate; // 【新增】
     }
 
     @Override
     public void register(RegisterDTO registerDTO) {
         if (userMapper.findByUsername(registerDTO.getUsername()) != null) {
-            throw new CustomException("用户名（学号）已被注册");
+            throw new CustomException("该学号已被注册");
         }
+        if (userMapper.findByEmail(registerDTO.getEmail()) != null) {
+            throw new CustomException("该邮箱已被注册");
+        }
+
+        // 【新增】校验验证码
+        String redisKey = EmailServiceImpl.VERIFICATION_CODE_KEY_PREFIX + registerDTO.getEmail();
+        String storedCode = redisTemplate.opsForValue().get(redisKey);
+
+        if (storedCode == null) {
+            throw new CustomException("验证码已过期，请重新发送");
+        }
+        if (!storedCode.equals(registerDTO.getVerificationCode())) {
+            throw new CustomException("验证码错误");
+        }
+
         User user = new User();
         user.setUsername(registerDTO.getUsername());
         user.setNickname(registerDTO.getNickname());
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
+        user.setEmail(registerDTO.getEmail());
+        user.setEmailVerified(true); // 验证通过
+
         userMapper.insertUser(user);
+
+        // 注册成功后，删除验证码
+        redisTemplate.delete(redisKey);
     }
 
     @Override

@@ -94,6 +94,12 @@
             <version>1.4.6</version>
         </dependency>
 
+        <!-- 【新增】Spring Boot Mail Starter，用于发送邮件 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

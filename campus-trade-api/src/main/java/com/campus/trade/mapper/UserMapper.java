@@ -15,6 +15,7 @@ public interface UserMapper {
     List<User> findAll();
     void updateUserStatus(@Param("id") String id, @Param("status") Integer status);
     User findById(String id);
+    User findByEmail(String email); // 【新增】
 
     // 【新增】更新用户信誉分的方法
     void updateCreditScore(@Param("userId") String userId, @Param("scoreChange") int scoreChange);

@@ -36,6 +36,18 @@ jwt:
   secret: "a-very-long-and-secure-secret-key-for-campus-trade-project-in-2025" # 【注意】生产环境请使用更安全的密钥
   expiration: 86400000 # 24小时
 
+mail:
+  host: smtp.qq.com # 【注意】以QQ邮箱为例，请替换为您自己的SMTP服务器地址
+  port: 587 # 【注意】通常是 465 (SSL) 或 587 (TLS)
+  username: 2678907515@qq.com # 【注意】您的发件邮箱地址
+  password: gwrpgyfqpwzqeacc # 【注意】这不是邮箱密码，而是生成的授权码
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
 # 文件上传配置
 #file:
 #  upload:

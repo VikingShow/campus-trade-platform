@@ -137,3 +137,7 @@ CREATE TABLE `product_images` (
 
 INSERT INTO `category` (`name`, `sort_order`) VALUES ('教材书籍', 1), ('电子产品', 2), ('生活用品', 3), ('代步工具', 4), ('服饰鞋包', 5), ('文具用品', 6), ('其他杂项', 99);
 INSERT INTO `meetup_location` (`name`, `description`) VALUES ('图书馆正门', '图书馆正门入口处'), ('第一教学楼', '一教大厅'), ('第一食堂', '一食堂门口'), ('紫荆公寓1号楼', '宿舍楼下');
+
+ALTER TABLE `user`
+    ADD COLUMN `email` VARCHAR(255) NULL UNIQUE COMMENT '用户邮箱' AFTER `password`,
+    ADD COLUMN `email_verified` BOOLEAN NOT NULL DEFAULT FALSE COMMENT '邮箱是否已验证' AFTER `email`;
