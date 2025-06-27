@@ -18,18 +18,9 @@
         <div v-if="product" class="product-detail-container">
           <el-row :gutter="30">
             <el-col :md="12">
-               <!-- 【最终修正】使用 v-if 进行条件渲染 -->
-              
-              <!-- 情况一：如果有多张图片，则渲染轮播图 -->
+               <!-- 情况一：如果有多张图片，则渲染轮播图 -->
               <el-carousel v-if="allImages.length > 1" trigger="click" height="400px" indicator-position="outside">
                 <el-carousel-item v-for="(imgUrl, index) in allImages" :key="index" class="carousel-item-wrapper">
-                  <!-- 
-                    关键修正:
-                    1. fit="cover": 强制图片填满容器，保持统一大小，多余部分会被裁剪。
-                    2. preview-src-list: 提供了点击查看大图的功能，它会自动生成一个图片画廊。
-                    3. initial-index: 确保点击哪张小图，就从哪张开始预览。
-                    4. preview-teleported: 确保预览层在最上层，不会被其他元素遮挡。
-                  -->
                   <el-image 
                     :src="imgUrl" 
                     :preview-src-list="allImages"
@@ -42,8 +33,9 @@
                 </el-carousel-item>
               </el-carousel>
               
-              <!-- 情况二：如果只有一张图片，则只渲染一张静态图片，但同样提供点击查看大图的功能 -->
-              <div v-else-if="allImages.length === 1" class="carousel-item-wrapper">
+              <!-- 情况二：如果只有一张图片，则只渲染一张静态图片 -->
+              <!-- 【最终修正】为这个容器也明确设置 height: 400px，与轮播图保持一致 -->
+              <div v-else-if="allImages.length === 1" class="carousel-item-wrapper" style="height: 400px;">
                 <el-image 
                   :src="allImages[0]" 
                   :preview-src-list="allImages"
@@ -317,16 +309,14 @@ h1 {
   align-items: center;
   width: 100%;
   height: 100%;
-  background-color: #f5f7fa; /* 浅灰色背景 */
+  background-color: #f5f7fa;
   border-radius: 8px;
-  overflow: hidden; /* 确保图片不会超出圆角 */
+  overflow: hidden;
 }
 
-/* 【修改】el-image 的 fit="cover" 属性会自动处理 object-fit，
-  我们只需确保它填满容器即可。
-*/
 .carousel-image {
   width: 100%;
   height: 100%;
+  object-fit: cover; /* 强制图片填满容器，保持统一大小 */
 }
 </style>
