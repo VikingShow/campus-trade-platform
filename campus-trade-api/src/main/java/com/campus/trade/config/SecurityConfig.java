@@ -85,6 +85,7 @@ public class SecurityConfig {
                         .antMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
                         .antMatchers("/uploads/**").permitAll()
                         .antMatchers(HttpMethod.GET, "/users/{id}/profile").permitAll()
+                        .antMatchers(HttpMethod.GET, "/locations").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

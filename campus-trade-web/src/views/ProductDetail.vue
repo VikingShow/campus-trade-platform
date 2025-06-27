@@ -4,15 +4,7 @@
       <!-- 加载时的骨架屏效果 -->
       <template #template>
         <el-row :gutter="30">
-          <el-col :md="12">
-            <!-- 【关键修改】使用轮播图展示所有图片 -->
-              <el-carousel trigger="click" height="400px" indicator-position="outside">
-                <!-- 将封面图和附图合并为一个列表进行轮播 -->
-                <el-carousel-item v-for="(imgUrl, index) in allImages" :key="index">
-                  <el-image :src="imgUrl" fit="cover" class="carousel-image" @error="onImageError"/>
-                </el-carousel-item>
-              </el-carousel>
-          </el-col>
+          <el-col :md="12"><el-skeleton-item variant="image" style="width: 100%; height: 400px;" /></el-col>
           <el-col :md="12">
               <el-skeleton-item variant="p" style="width: 50%; margin-bottom: 20px;" />
               <el-skeleton-item variant="p" style="width: 30%; margin-bottom: 30px;" />
@@ -22,15 +14,47 @@
       </template>
       
       <!-- 加载完成后的真实内容 -->
-      <template #default>
+     <template #default>
         <div v-if="product" class="product-detail-container">
           <el-row :gutter="30">
             <el-col :md="12">
-              <el-image :src=product.coverImage fit="cover" class="product-main-image" @error="onImageError">
-                <template #placeholder>
-                  <div class="image-slot">加载中<span class="dot">...</span></div>
-                </template>
-              </el-image>
+               <!-- 【最终修正】使用 v-if 进行条件渲染 -->
+              
+              <!-- 情况一：如果有多张图片，则渲染轮播图 -->
+              <el-carousel v-if="allImages.length > 1" trigger="click" height="400px" indicator-position="outside">
+                <el-carousel-item v-for="(imgUrl, index) in allImages" :key="index" class="carousel-item-wrapper">
+                  <!-- 
+                    关键修正:
+                    1. fit="cover": 强制图片填满容器，保持统一大小，多余部分会被裁剪。
+                    2. preview-src-list: 提供了点击查看大图的功能，它会自动生成一个图片画廊。
+                    3. initial-index: 确保点击哪张小图，就从哪张开始预览。
+                    4. preview-teleported: 确保预览层在最上层，不会被其他元素遮挡。
+                  -->
+                  <el-image 
+                    :src="imgUrl" 
+                    :preview-src-list="allImages"
+                    :initial-index="index"
+                    preview-teleported
+                    fit="cover" 
+                    class="carousel-image" 
+                    @error="onImageError"
+                  />
+                </el-carousel-item>
+              </el-carousel>
+              
+              <!-- 情况二：如果只有一张图片，则只渲染一张静态图片，但同样提供点击查看大图的功能 -->
+              <div v-else-if="allImages.length === 1" class="carousel-item-wrapper">
+                <el-image 
+                  :src="allImages[0]" 
+                  :preview-src-list="allImages"
+                  :initial-index="0"
+                  preview-teleported
+                  fit="cover" 
+                  class="carousel-image" 
+                  @error="onImageError"
+                />
+              </div>
+
             </el-col>
             <el-col :md="12">
               <h1>{{ product.title }}</h1>
@@ -123,7 +147,9 @@ const recommendations = ref([]);
 // 【新增】计算属性，用于合并封面图和附图列表
 const allImages = computed(() => {
     if (!product.value || !product.value.coverImage) return [];
-    return [product.value.coverImage, ...(product.value.imageUrls || [])];
+    const otherImages = product.value.imageUrls || [];
+    // 使用 Set 去重，防止封面图和附图列表重复
+    return [...new Set([product.value.coverImage, ...otherImages])].filter(url => url);
 });
 
 // 定义后端服务的地址，用于拼接完整的图片URL
@@ -153,9 +179,10 @@ const onImageError = (e) => {
 };
 
 // 获取商品详情和推荐数据
-const fetchProduct = async () => {
+const fetchAllData = async () => {
   loading.value = true;
-  recommendations.value = []; 
+  product.value = null;
+  recommendations.value = [];
   try {
     const res = await getProductById(props.id);
     product.value = res.data.data;
@@ -163,7 +190,7 @@ const fetchProduct = async () => {
         fetchRecommendations();
     }
   } catch (err) {
-    product.value = null;
+    console.error("获取商品详情失败:", err);
   } finally {
     loading.value = false;
   }
@@ -173,7 +200,6 @@ const fetchProduct = async () => {
 const fetchRecommendations = async () => {
     try {
         const res = await getRecommendations(props.id);
-        // 过滤掉当前商品自身
         recommendations.value = res.data.data.filter(p => p.id !== props.id);
     } catch (error) {
         console.error("获取推荐商品失败:", error);
@@ -212,7 +238,7 @@ const toggleFavorite = () => {
 };
 
 // 监听路由参数变化，当从一个详情页跳转到另一个详情页时，重新加载数据
-watch(() => props.id, fetchProduct, { immediate: true });
+watch(() => props.id, fetchAllData, { immediate: true });
 
 </script>
 
@@ -284,4 +310,23 @@ h1 {
 .product-title { font-size: 16px; color: #303133; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 8px 0; }
 .bottom { display: flex; justify-content: space-between; align-items: center; }
 .product-price { font-size: 18px; color: #F56C6C; font-weight: bold; }
+/* 为轮播图的每一项增加一个容器，用于设置背景和居中 */
+.carousel-item-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f5f7fa; /* 浅灰色背景 */
+  border-radius: 8px;
+  overflow: hidden; /* 确保图片不会超出圆角 */
+}
+
+/* 【修改】el-image 的 fit="cover" 属性会自动处理 object-fit，
+  我们只需确保它填满容器即可。
+*/
+.carousel-image {
+  width: 100%;
+  height: 100%;
+}
 </style>

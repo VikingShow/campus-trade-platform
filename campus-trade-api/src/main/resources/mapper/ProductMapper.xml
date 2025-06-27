@@ -19,8 +19,25 @@
         <result property="creditScore" column="credit_score"/>
     </resultMap>
 
-    <!-- 用于详情查询的、包含图片列表的复杂 ResultMap -->
-    <resultMap id="ProductWithDetails" type="com.campus.trade.entity.Product" extends="ProductWithSeller">
+    <!-- 【关键修正】用于详情查询的、包含图片列表的复杂 ResultMap -->
+    <resultMap id="ProductWithDetails" type="com.campus.trade.entity.Product">
+        <id property="id" column="p_id"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+        <result property="conditionLevel" column="condition_level"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="status" column="p_status"/>
+        <result property="createTime" column="p_create_time"/>
+        <result property="sellerNickname" column="nickname"/>
+        <result property="sellerAvatar" column="avatar"/>
+        <result property="creditScore" column="credit_score"/>
+        <!--
+          使用 <collection> 标签来映射一对多的图片列表。
+          它会把所有关联的图片URL，收集到一个名为 "imageUrls" 的 List 中。
+        -->
         <collection property="imageUrls" ofType="java.lang.String">
             <result column="image_url"/>
         </collection>
@@ -32,6 +49,7 @@
         u.nickname, u.avatar, u.credit_score
     </sql>
 
+    <!-- 【关键修正】查询商品详情时，LEFT JOIN product_images 表，以获取所有图片 -->
     <select id="findProductById" resultMap="ProductWithDetails">
         SELECT
         <include refid="productColumns"/>,

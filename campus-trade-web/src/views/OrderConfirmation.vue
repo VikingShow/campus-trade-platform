@@ -17,11 +17,13 @@
       
       <div class="delivery-section">
         <h3>选择交易地点</h3>
-        <el-select v-model="selectedLocation" placeholder="请选择一个校园内交易地点" style="width: 100%;">
-            <el-option label="图书馆正门" :value="1"></el-option>
-            <el-option label="第一教学楼" :value="2"></el-option>
-            <el-option label="第一食堂" :value="3"></el-option>
-            <el-option label="紫荆公寓1号楼" :value="4"></el-option>
+        <el-select v-model="selectedLocation" placeholder="请选择一个校园内交易地点" style="width: 100%;" :loading="locationsLoading">
+            <el-option 
+              v-for="location in locations"
+              :key="location.id"
+              :label="location.name" 
+              :value="location.id"
+            />
         </el-select>
         <h3 style="margin-top: 20px;">建议交易时间</h3>
         <el-input v-model="meetupTimeSlot" placeholder="例如：明天下午3点-5点"></el-input>
@@ -43,11 +45,16 @@ import { useRouter } from 'vue-router';
 import { getProductById } from '../api/product';
 import { createOrder } from '../api/order';
 import { ElMessage } from 'element-plus';
+import { getPublicLocations } from '../api/location'; // 【新增】导入API函数
+
 
 const props = defineProps({ productId: String });
 const router = useRouter();
 const product = ref(null);
 const loading = ref(true);
+// 【修改】交易地点相关状态
+const locations = ref([]);
+const locationsLoading = ref(false);
 const selectedLocation = ref(null);
 const meetupTimeSlot = ref('');
 const submitting = ref(false);
@@ -72,6 +79,19 @@ const fetchProduct = async () => {
     }
 };
 
+// 【新增】获取交易地点的函数
+const fetchLocations = async () => {
+    locationsLoading.value = true;
+    try {
+        const response = await getPublicLocations();
+        locations.value = response.data.data;
+    } catch (error) {
+        ElMessage.error("获取交易地点失败");
+    } finally {
+        locationsLoading.value = false;
+    }
+};
+
 const submitOrder = async () => {
     if(!selectedLocation.value) {
         ElMessage.warning('请选择一个交易地点');
@@ -93,7 +113,10 @@ const submitOrder = async () => {
     }
 };
 
-onMounted(fetchProduct);
+onMounted(() => {
+  fetchProduct();
+  fetchLocations(); // 【新增】页面加载时同时获取地点列表
+});
 </script>
 
 <style scoped>

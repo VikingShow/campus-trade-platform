@@ -49,7 +49,14 @@
       <el-row :gutter="20" v-loading="loading" style="margin-top: 20px;">
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in products" :key="product.id" style="margin-bottom: 20px;">
           <el-card shadow="hover" class="product-card" @click="goToDetail(product.id)">
-             <img :src=product.coverImage class="product-image" alt="商品图片" @error="onImageError"/>
+            <div class="image-container">
+                <img :src="product.coverImage" class="product-image" alt="商品图片" @error="onImageError"/>
+                <!-- 【新增】如果商品有多张图片，显示一个角标 -->
+                <div v-if="product.imageUrls && product.imageUrls.length > 0" class="image-count-overlay">
+                    <el-icon><CameraFilled /></el-icon>
+                    <span>1 / {{ 1 + product.imageUrls.length }}</span>
+                </div>
+             </div>
              <div class="product-info">
                <p class="product-title">{{ product.title }}</p>
                <div class="bottom">
@@ -68,7 +75,7 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { Search } from '@element-plus/icons-vue';
+import { Search, CameraFilled } from '@element-plus/icons-vue'; // 【新增】导入相机图标
 import { getProducts } from '../api/product';
 import apiClient from '../api/axios.config';
 import { debounce } from '../utils/debounce';
@@ -102,7 +109,22 @@ const fetchProducts = async () => {
             }
         }
         const response = await getProducts(params);
-        products.value = response.data.data;
+        // 【最终修正】对返回的数据进行分组处理，以合并同一个商品的多张图片
+        const productMap = new Map();
+        response.data.data.forEach(item => {
+            if (!productMap.has(item.id)) {
+                productMap.set(item.id, { ...item, imageUrls: [] });
+            }
+            if (item.imageUrls && item.imageUrls[0]) { // imageUrls[0] is the joined image_url
+                 const existingProduct = productMap.get(item.id);
+                 // 避免重复添加封面图
+                 if (item.imageUrls[0] !== existingProduct.coverImage) {
+                    existingProduct.imageUrls.push(item.imageUrls[0]);
+                 }
+            }
+        });
+        products.value = Array.from(productMap.values());
+
     } catch (error) {
         console.error("获取商品列表失败:", error);
     } finally {
@@ -146,7 +168,27 @@ onMounted(() => {
     color: #909399;
 }
 .product-card { cursor: pointer; }
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+}
 .product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 4px; }
+.image-count-overlay {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+.image-count-overlay .el-icon {
+    margin-right: 4px;
+}
 .product-info { padding: 14px; }
 .product-title { font-size: 16px; color: #303133; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 8px 0; }
 .bottom { display: flex; justify-content: space-between; align-items: center; }

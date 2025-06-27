@@ -43,10 +43,22 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.findProducts(keyword, categoryId, minPrice, maxPrice, orderBy);
     }
 
+    /**
+     * 【最终诊断修正】
+     * 我已将 @Cacheable 注解暂时注释掉。
+     * 这会强制此方法在每一次被调用时，都必须去数据库执行一次全新的查询，
+     * 从而彻底绕过任何可能存在的、被污染的旧缓存。
+     */
     @Override
-    @Cacheable(value = "product", key = "#productId")
+    // @Cacheable(value = "product", key = "#productId")
     public Product getProductById(String productId) {
-        return productMapper.findProductById(productId);
+        log.info(">>> [缓存已禁用] 正在为商品ID {} 从数据库强制查询详情...", productId);
+        Product product = productMapper.findProductById(productId);
+        if (product == null) {
+            throw new CustomException("商品不存在或已下架");
+        }
+        log.info("<<< 数据库查询成功，商品附图数量为: {}", (product.getImageUrls() != null ? product.getImageUrls().size() : 0));
+        return product;
     }
 
     @Override
