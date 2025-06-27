@@ -30,7 +30,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole())), // 传递角色权限
                 user.getId(),
-                user.getNickname()
+                user.getNickname(),
+                user.getAvatar() // 传递头像
         );
     }
 }

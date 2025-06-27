@@ -51,7 +51,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public Product createProduct(ProductDTO productDTO, String sellerId) {
+        log.info(">>> [新增商品] 清除 'products' 缓存。");
         Product product = new Product();
         product.setTitle(productDTO.getTitle());
         product.setDescription(productDTO.getDescription());

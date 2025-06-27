@@ -45,7 +45,7 @@
                 <el-descriptions-item label="发布时间">{{ new Date(product.createTime).toLocaleDateString() }}</el-descriptions-item>
                 <el-descriptions-item label="卖家">
                   <div class="seller-box">
-                    <el-avatar :src=product.sellerAvatar icon="UserFilled" />
+                    <el-avatar :src="product.sellerAvatar" icon="UserFilled" />
                     <router-link :to="`/user/${product.sellerId}`" class="seller-link">
                         <span class="seller-name">{{ product.sellerNickname }}</span>
                     </router-link>
@@ -88,7 +88,7 @@
         <el-row :gutter="20">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="rec in recommendations" :key="rec.id">
                 <el-card shadow="hover" class="product-card" @click="goToDetail(rec.id)">
-                    <img :src=rec.coverImage class="product-image" alt="推荐商品图片" @error="onImageError"/>
+                    <img :src="rec.coverImage" class="product-image" alt="推荐商品图片" @error="onImageError"/>
                     <div class="product-info">
                         <p class="product-title">{{ rec.title }}</p>
                         <div class="bottom">

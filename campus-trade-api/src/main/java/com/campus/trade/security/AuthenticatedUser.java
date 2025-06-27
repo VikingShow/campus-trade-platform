@@ -8,11 +8,15 @@ import java.util.Collection;
 public class AuthenticatedUser extends User {
     private final String userId;
     private final String nickname;
+    private final String avatar; // 【新增】
 
-    public AuthenticatedUser(String username, String password, Collection<? extends GrantedAuthority> authorities, String userId, String nickname) {
+
+    public AuthenticatedUser(String username, String password, Collection<? extends GrantedAuthority> authorities, String userId, String nickname, String avatar) { //【修改】
         super(username, password, authorities);
         this.userId = userId;
         this.nickname = nickname;
+        this.avatar = avatar; // 【新增】
+
     }
 
     public String getUserId() {
@@ -22,4 +26,7 @@ public class AuthenticatedUser extends User {
     public String getNickname() {
         return nickname;
     }
+
+    public String getAvatar() { return avatar; } // 【新增】
+
 }

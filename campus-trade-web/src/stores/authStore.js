@@ -34,9 +34,13 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         const payload = { ...credentials };
         const response = await apiClient.post('/users/authenticate', payload);
+        
+        // 【关键修正】从API响应中获取完整的用户信息，包括头像
         const { token: apiToken, nickname, id, avatar } = response.data.data;
         const userInfo = { nickname, id, avatar };
+
         setAuth({ token: apiToken, user: userInfo });
+        await fetchFavoriteIds();
         return true;
       } catch (error) {
         return false;
@@ -49,10 +53,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
     
     // 更新个人资料
-    async function updateUserProfile(profileData) {
+   async function updateUserProfile(profileData) {
         try {
             const response = await updateMyProfile(profileData);
             const updatedUser = response.data.data;
+            // 更新本地存储的用户信息，确保包含了所有字段
             const currentUserInfo = { 
                 nickname: updatedUser.nickname, 
                 id: updatedUser.id, 

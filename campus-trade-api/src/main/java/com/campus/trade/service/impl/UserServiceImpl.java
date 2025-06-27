@@ -75,6 +75,7 @@ public class UserServiceImpl implements UserService {
         response.put("token", token);
         response.put("nickname", authenticatedUser.getNickname());
         response.put("id", authenticatedUser.getUserId());
+        response.put("avatar", authenticatedUser.getAvatar()); // 【新增】在响应中加入头像
         return response;
     }
 
