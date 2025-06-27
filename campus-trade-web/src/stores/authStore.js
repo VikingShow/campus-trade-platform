@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
     function logout() {
         token.value = null;
         user.value = null;
+        favoriteIds.value = new Set(); // 登出时清空收藏
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     }

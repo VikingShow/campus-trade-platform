@@ -42,6 +42,8 @@ import { useAuthStore } from './stores/authStore';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { UserFilled, SwitchFilled } from '@element-plus/icons-vue';
+import { onMounted } from 'vue'; // 【新增】导入 onMounted
+
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -51,6 +53,12 @@ const handleLogout = () => {
     ElMessage.success('已成功退出登录');
     router.push('/login');
 };
+
+onMounted(() => {
+    if (authStore.isAuthenticated) {
+        authStore.fetchFavoriteIds();
+    }
+});
 </script>
 
 <style>
