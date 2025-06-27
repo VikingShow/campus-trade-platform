@@ -12,7 +12,7 @@
               :class="['conversation-item', { 'is-active': $route.params.otherUserId === conv.otherUserId }]"
               @click="selectConversation(conv.otherUserId)"
             >
-              <el-avatar :size="50" :src="fullImageUrl(conv.otherUserAvatar)" icon="UserFilled" />
+              <el-avatar :size="50" :src=conv.otherUserAvatar icon="UserFilled" />
               <div class="conv-info">
                 <div class="conv-nickname">{{ conv.otherUserNickname }}</div>
                 <div class="conv-last-msg">{{ conv.lastMessageContent }}</div>
@@ -38,12 +38,12 @@ const router = useRouter();
 const conversations = ref([]);
 const loading = ref(false);
 
-const backendUrl = 'http://localhost:8080';
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const backendUrl = 'http://localhost:8080';
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const fetchConversations = async () => {
   loading.value = true;

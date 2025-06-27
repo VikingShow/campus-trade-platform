@@ -4,19 +4,26 @@
       <h3>{{ isEdit ? '编辑商品信息' : '发布新的二手宝贝' }}</h3>
     </template>
     <el-form :model="form" :rules="rules" label-width="120px" ref="formRef" style="max-width: 600px; margin: auto;">
-      <el-form-item label="商品图片" prop="coverImage">
+      
+      <el-form-item label="商品图片" prop="fileList">
         <el-upload
-          class="product-uploader"
+          v-model:file-list="form.fileList"
           action="/api/files/upload"
-          :show-file-list="false"
+          list-type="picture-card"
+          :multiple="true"
+          :limit="3"
           :on-success="handleUploadSuccess"
+          :on-remove="handleRemove"
+          :on-preview="handlePictureCardPreview"
           :before-upload="beforeUpload"
           :headers="{ 'Authorization': `Bearer ${authStore.token}` }"
+          :class="{ 'hide-upload': form.fileList.length >= 3 }"
         >
-          <img v-if="form.coverImage" :src="form.coverImage" class="product-image" alt="已上传图片"/>
-          <el-icon v-else class="uploader-icon"><Plus /></el-icon>
+          <el-icon><Plus /></el-icon>
         </el-upload>
+        <p class="upload-tip">第一张将作为封面图，最多上传3张图片。</p>
       </el-form-item>
+
       <el-form-item label="标题" prop="title">
         <el-input v-model="form.title" placeholder="一个响亮的标题能吸引更多人"></el-input>
       </el-form-item>
@@ -45,6 +52,10 @@
         </el-button>
       </el-form-item>
     </el-form>
+
+    <el-dialog v-model="dialogVisible">
+      <img w-full :src="dialogImageUrl" alt="Preview Image" style="width: 100%" />
+    </el-dialog>
   </el-card>
 </template>
 
@@ -56,7 +67,6 @@ import { ElMessage } from 'element-plus';
 import { createProduct, getProductById, updateProduct } from '../api/product';
 import apiClient from '../api/axios.config';
 import { Plus } from '@element-plus/icons-vue';
-import ProductDetail from './ProductDetail.vue';
 
 const props = defineProps({ id: String });
 const router = useRouter();
@@ -70,44 +80,48 @@ const form = reactive({
   price: 0.01,
   categoryId: '',
   conditionLevel: 3,
-  coverImage: '',
+  fileList: [], 
 });
+
+const dialogImageUrl = ref('');
+const dialogVisible = ref(false);
 
 const rules = {
   title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
-  description: [{ required: true, message: '请输入描述', trigger: 'blur' }],
   price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
-  conditionLevel: [{ required: true, message: '请选择新旧程度', trigger: 'change' }],
-  coverImage: [{ required: true, message: '请上传商品图片', trigger: 'change' }],
+  fileList: [{ type: 'array', required: true, message: '请至少上传一张图片', trigger: 'change' }]
 };
 
 const isEdit = computed(() => !!props.id);
-
 const categories = ref([]);
 const categoriesLoading = ref(false);
 
-const backendUrl = 'http://localhost:8080';
-const fullImageUrl = computed(() => {
-    if (!form.coverImage) return '';
-    if (form.coverImage.startsWith('http')) return form.coverImage;
-    return `${backendUrl}${form.coverImage}`;
-});
-
-const handleUploadSuccess = (response) => {
-  form.coverImage = response.data.url;
+const handleUploadSuccess = (response, uploadFile, uploadFiles) => {
+  uploadFile.url = response.data.url;
+  // 更新整个 fileList 以确保响应性
+  form.fileList = [...uploadFiles]; 
   ElMessage.success('图片上传成功');
 };
 
+const handleRemove = (uploadFile, uploadFiles) => {
+  form.fileList = uploadFiles;
+};
+
+const handlePictureCardPreview = (uploadFile) => {
+  dialogImageUrl.value = uploadFile.url;
+  dialogVisible.value = true;
+};
+
 const beforeUpload = (rawFile) => {
-  const isJpgOrPng = rawFile.type === 'image/jpeg' || rawFile.type === 'image/png';
-  if (!isJpgOrPng) {
-    ElMessage.error('图片必须是 JPG 或 PNG 格式!');
+  const isAcceptedType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(rawFile.type);
+  if (!isAcceptedType) {
+    ElMessage.error('图片必须是 JPG, PNG, GIF 或 WEBP 格式!');
     return false;
   }
-  const isLt5M = rawFile.size / 1024 / 1024 < 5;
-   if (!isLt5M) {
-    ElMessage.error('图片大小不能超过 5MB!');
+  const isLt10M = rawFile.size / 1024 / 1024 < 10;
+   if (!isLt10M) {
+    ElMessage.error('图片大小不能超过 10MB!');
     return false;
   }
   return true;
@@ -119,12 +133,23 @@ const handleSubmit = async () => {
     if(valid) {
       submitting.value = true;
       try {
+        const imageUrls = form.fileList.map(file => file.url);
+        const payload = {
+          title: form.title,
+          description: form.description,
+          price: form.price,
+          categoryId: form.categoryId,
+          conditionLevel: form.conditionLevel,
+          coverImage: imageUrls[0], 
+          imageUrls: imageUrls.slice(1)
+        };
+
         if (isEdit.value) {
-          await updateProduct(props.id, form);
+          await updateProduct(props.id, payload);
           ElMessage.success('更新成功');
           router.push(`/product/${props.id}`);
         } else {
-          await createProduct(form);
+          await createProduct(payload);
           ElMessage.success('发布成功');
           router.push('/');
         }
@@ -140,7 +165,20 @@ const handleSubmit = async () => {
 const fetchProductData = async (id) => {
     try {
         const res = await getProductById(id);
-        Object.assign(form, res.data.data);
+        const productData = res.data.data;
+        
+        form.title = productData.title;
+        form.description = productData.description;
+        form.price = productData.price;
+        form.categoryId = productData.categoryId;
+        form.conditionLevel = productData.conditionLevel;
+        
+        const images = [productData.coverImage, ...(productData.imageUrls || [])].filter(Boolean);
+        form.fileList = images.map((url) => ({
+            // 从 URL 中提取真实的文件名，如果失败则使用一个默认名
+            name: url.substring(url.lastIndexOf('/') + 1) || 'image.png',
+            url: url,
+        }));
     } catch(error) {
         console.error(error);
         ElMessage.error('加载商品数据失败');
@@ -169,8 +207,12 @@ onMounted(() => {
 </script>
 
 <style>
-.product-uploader .el-upload { border: 1px dashed var(--el-border-color); border-radius: 6px; cursor: pointer; position: relative; overflow: hidden; transition: var(--el-transition-duration-fast); }
-.product-uploader .el-upload:hover { border-color: var(--el-color-primary); }
-.product-image { width: 178px; height: 178px; display: block; }
-.uploader-icon { font-size: 28px; color: #8c939d; width: 178px; height: 178px; text-align: center; }
+.upload-tip {
+  color: #909399;
+  font-size: 12px;
+  margin-top: 5px;
+}
+.hide-upload .el-upload--picture-card {
+    display: none;
+}
 </style>

@@ -1,11 +1,13 @@
 package com.campus.trade.controller;
 
 import com.campus.trade.common.Result;
+import com.campus.trade.dto.ProductDTO;
 import com.campus.trade.entity.Product;
 import com.campus.trade.exception.CustomException;
 import com.campus.trade.security.AuthenticatedUser;
 import com.campus.trade.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -15,7 +17,12 @@ import java.util.Map;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired private ProductService productService;
+    private final ProductService productService;
+
+    @Autowired
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     private String getUserId(AuthenticatedUser user) {
         if (user == null) throw new CustomException("用户未登录");
@@ -39,22 +46,24 @@ public class ProductController {
     }
 
     @PostMapping
-    public Result<Product> createProduct(@RequestBody Product product, @AuthenticationPrincipal AuthenticatedUser user) {
-        Product createdProduct = productService.createProduct(product, getUserId(user));
+    @PreAuthorize("isAuthenticated()")
+    public Result<Product> createProduct(@RequestBody ProductDTO productDTO, @AuthenticationPrincipal AuthenticatedUser user) {
+        Product createdProduct = productService.createProduct(productDTO, user.getUserId());
         return Result.success(createdProduct);
     }
 
     @PutMapping("/{id}")
-    public Result<Product> updateProduct(@PathVariable String id, @RequestBody Product product, @AuthenticationPrincipal AuthenticatedUser user) {
-        product.setId(id);
-        Product updatedProduct = productService.updateProduct(product, getUserId(user));
+    @PreAuthorize("isAuthenticated()")
+    public Result<Product> updateProduct(@PathVariable String id, @RequestBody ProductDTO productDTO, @AuthenticationPrincipal AuthenticatedUser user) {
+        Product updatedProduct = productService.updateProduct(id, productDTO, user.getUserId());
         return Result.success(updatedProduct);
     }
 
     @PutMapping("/{id}/status")
-    public Result<Void> updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload, @AuthenticationPrincipal AuthenticatedUser user) {
+    @PreAuthorize("isAuthenticated()")
+    public Result<Void> updateStatus(@PathVariable String id, @RequestBody Map<String, String> payload, @AuthenticationPrincipal AuthenticatedUser user){
         String status = payload.get("status");
-        productService.updateProductStatus(id, status, getUserId(user));
+        productService.updateProductStatus(id, status, user);
         return Result.success();
     }
 

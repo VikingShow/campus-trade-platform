@@ -3,9 +3,9 @@
     <div class="chat-header">与 {{ otherUserInfo.nickname || '用户' }} 的对话</div>
     <el-scrollbar class="message-area" ref="scrollbarRef">
       <div v-for="msg in messages" :key="msg.id" :class="['message-bubble-wrapper', { 'is-me': msg.senderId === currentUser.id }]">
-        <el-avatar v-if="msg.senderId !== currentUser.id" :src="fullImageUrl(otherUserInfo.avatar)" icon="UserFilled" />
+        <el-avatar v-if="msg.senderId !== currentUser.id" :src=otherUserInfo.avatar icon="UserFilled" />
         <div class="message-bubble">{{ msg.content }}</div>
-        <el-avatar v-if="msg.senderId === currentUser.id" :src="fullImageUrl(currentUser.avatar)" icon="UserFilled" />
+        <el-avatar v-if="msg.senderId === currentUser.id" :src=currentUser.avatar icon="UserFilled" />
       </div>
     </el-scrollbar>
     <div class="input-area">
@@ -43,13 +43,13 @@ const scrollbarRef = ref(null);
 const otherUserInfo = ref({});
 let pollingInterval = null;
 
-const backendUrl = 'http://localhost:8080';
+// const backendUrl = 'http://localhost:8080';
 
-const fullImageUrl = (relativePath) => {
-    if (!relativePath) return '';
-    if (relativePath.startsWith('http')) return relativePath;
-    return `${backendUrl}${relativePath}`;
-};
+// const fullImageUrl = (relativePath) => {
+//     if (!relativePath) return '';
+//     if (relativePath.startsWith('http')) return relativePath;
+//     return `${backendUrl}${relativePath}`;
+// };
 
 const scrollToBottom = () => {
   nextTick(() => {

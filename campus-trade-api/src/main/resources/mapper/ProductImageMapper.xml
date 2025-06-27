@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.trade.mapper.ProductImageMapper">
+    <insert id="batchInsert">
+        INSERT INTO product_images (product_id, image_url)
+        VALUES
+        <foreach collection="imageUrls" item="url" separator=",">
+            (#{productId}, #{url})
+        </foreach>
+    </insert>
+    <delete id="deleteByProductId">
+        DELETE FROM product_images WHERE product_id = #{productId}
+    </delete>
+</mapper>

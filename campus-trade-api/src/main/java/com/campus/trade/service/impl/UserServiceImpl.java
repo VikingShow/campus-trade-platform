@@ -18,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
@@ -52,7 +53,6 @@ public class UserServiceImpl implements UserService {
         user.setUsername(registerDTO.getUsername());
         user.setNickname(registerDTO.getNickname());
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-        // 注意：注册时角色默认为 USER，这是在 UserMapper.xml 中设置的
         userMapper.insertUser(user);
     }
 
@@ -63,13 +63,12 @@ public class UserServiceImpl implements UserService {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
 
-        } catch (BadCredentialsException e) {
+        } catch (AuthenticationException e) {
             throw new CustomException("用户名或密码错误");
         }
 
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
 
-        // 【最终修正】调用 generateToken 方法时，只传递一个参数
         final String token = jwtUtil.generateToken(authenticatedUser);
 
         Map<String, String> response = new HashMap<>();

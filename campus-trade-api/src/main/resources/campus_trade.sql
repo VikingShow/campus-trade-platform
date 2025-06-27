@@ -126,5 +126,14 @@ CREATE TABLE `notifications` (
                                  FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站内通知表';
 
+CREATE TABLE `product_images` (
+                                  `id` BIGINT AUTO_INCREMENT,
+                                  `product_id` BIGINT NOT NULL COMMENT '关联的商品ID',
+                                  `image_url` VARCHAR(255) NOT NULL COMMENT '图片URL',
+                                  `sort_order` INT DEFAULT 0 COMMENT '图片排序',
+                                  PRIMARY KEY (`id`),
+                                  FOREIGN KEY (`product_id`) REFERENCES `product`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品图片表';
+
 INSERT INTO `category` (`name`, `sort_order`) VALUES ('教材书籍', 1), ('电子产品', 2), ('生活用品', 3), ('代步工具', 4), ('服饰鞋包', 5), ('文具用品', 6), ('其他杂项', 99);
 INSERT INTO `meetup_location` (`name`, `description`) VALUES ('图书馆正门', '图书馆正门入口处'), ('第一教学楼', '一教大厅'), ('第一食堂', '一食堂门口'), ('紫荆公寓1号楼', '宿舍楼下');

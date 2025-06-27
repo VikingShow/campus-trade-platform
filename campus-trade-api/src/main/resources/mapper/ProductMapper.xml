@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.campus.trade.mapper.ProductMapper">
 
+    <!-- 用于列表查询的、简单的 ResultMap -->
     <resultMap id="ProductWithSeller" type="com.campus.trade.entity.Product">
         <id property="id" column="p_id"/>
         <result property="sellerId" column="seller_id"/>
@@ -15,18 +16,31 @@
         <result property="createTime" column="p_create_time"/>
         <result property="sellerNickname" column="nickname"/>
         <result property="sellerAvatar" column="avatar"/>
-        <!-- 【新增】映射 credit_score 字段 -->
         <result property="creditScore" column="credit_score"/>
     </resultMap>
 
-    <!-- 【关键修正】在查询时连带查出卖家的信誉分 -->
+    <!-- 用于详情查询的、包含图片列表的复杂 ResultMap -->
+    <resultMap id="ProductWithDetails" type="com.campus.trade.entity.Product" extends="ProductWithSeller">
+        <collection property="imageUrls" ofType="java.lang.String">
+            <result column="image_url"/>
+        </collection>
+    </resultMap>
+
     <sql id="productColumns">
         p.id as p_id, p.seller_id, p.category_id, p.title, p.description, p.price,
         p.condition_level, p.cover_image, p.status as p_status, p.create_time as p_create_time,
         u.nickname, u.avatar, u.credit_score
     </sql>
 
-    <!-- 所有使用了 <include refid="productColumns"/> 的 <select> 语句都会自动应用此修改 -->
+    <select id="findProductById" resultMap="ProductWithDetails">
+        SELECT
+        <include refid="productColumns"/>,
+        pi.image_url
+        FROM product p
+        JOIN user u ON p.seller_id = u.id
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        WHERE p.id = #{productId}
+    </select>
 
     <!-- 【修改】findProducts 查询，加入价格区间和动态排序逻辑 -->
     <select id="findProducts" resultMap="ProductWithSeller">
@@ -56,12 +70,6 @@
                 ORDER BY p.create_time DESC
             </otherwise>
         </choose>
-    </select>
-
-    <select id="findProductById" resultMap="ProductWithSeller">
-        SELECT <include refid="productColumns"/>
-        FROM product p JOIN user u ON p.seller_id = u.id
-        WHERE p.id = #{productId}
     </select>
 
     <select id="findAllForAdmin" resultMap="ProductWithSeller">

@@ -4,7 +4,15 @@
       <!-- 加载时的骨架屏效果 -->
       <template #template>
         <el-row :gutter="30">
-          <el-col :md="12"><el-skeleton-item variant="image" style="width: 100%; height: 400px;" /></el-col>
+          <el-col :md="12">
+            <!-- 【关键修改】使用轮播图展示所有图片 -->
+              <el-carousel trigger="click" height="400px" indicator-position="outside">
+                <!-- 将封面图和附图合并为一个列表进行轮播 -->
+                <el-carousel-item v-for="(imgUrl, index) in allImages" :key="index">
+                  <el-image :src="imgUrl" fit="cover" class="carousel-image" @error="onImageError"/>
+                </el-carousel-item>
+              </el-carousel>
+          </el-col>
           <el-col :md="12">
               <el-skeleton-item variant="p" style="width: 50%; margin-bottom: 20px;" />
               <el-skeleton-item variant="p" style="width: 30%; margin-bottom: 30px;" />
@@ -112,6 +120,12 @@ const product = ref(null);
 const loading = ref(true);
 const recommendations = ref([]);
 
+// 【新增】计算属性，用于合并封面图和附图列表
+const allImages = computed(() => {
+    if (!product.value || !product.value.coverImage) return [];
+    return [product.value.coverImage, ...(product.value.imageUrls || [])];
+});
+
 // 定义后端服务的地址，用于拼接完整的图片URL
 // const backendUrl = 'http://localhost:8080';
 
@@ -139,19 +153,17 @@ const onImageError = (e) => {
 };
 
 // 获取商品详情和推荐数据
-const fetchAllData = async () => {
+const fetchProduct = async () => {
   loading.value = true;
-  product.value = null; // 重置商品信息
-  recommendations.value = []; // 切换商品时清空旧推荐
+  recommendations.value = []; 
   try {
     const res = await getProductById(props.id);
     product.value = res.data.data;
-    // 获取商品详情成功后，再去获取推荐
     if(product.value) {
         fetchRecommendations();
     }
   } catch (err) {
-    console.error("获取商品详情失败:", err);
+    product.value = null;
   } finally {
     loading.value = false;
   }
@@ -200,7 +212,7 @@ const toggleFavorite = () => {
 };
 
 // 监听路由参数变化，当从一个详情页跳转到另一个详情页时，重新加载数据
-watch(() => props.id, fetchAllData, { immediate: true });
+watch(() => props.id, fetchProduct, { immediate: true });
 
 </script>
 

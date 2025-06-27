@@ -1,9 +1,12 @@
 package com.campus.trade.service.impl;
 
 import com.campus.trade.dto.PageResult;
+import com.campus.trade.dto.ProductDTO;
 import com.campus.trade.entity.Product;
 import com.campus.trade.exception.CustomException;
+import com.campus.trade.mapper.ProductImageMapper;
 import com.campus.trade.mapper.ProductMapper;
+import com.campus.trade.security.AuthenticatedUser;
 import com.campus.trade.service.ProductService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -13,8 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -22,86 +29,103 @@ public class ProductServiceImpl implements ProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private final ProductMapper productMapper;
+    private final ProductImageMapper productImageMapper;
 
     @Autowired
-    public ProductServiceImpl(ProductMapper productMapper) {
+    public ProductServiceImpl(ProductMapper productMapper, ProductImageMapper productImageMapper) {
         this.productMapper = productMapper;
+        this.productImageMapper = productImageMapper;
     }
 
-    // 【修改】getProducts 方法实现，传递所有参数
     @Override
     @Cacheable("products")
     public List<Product> getProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String orderBy) {
         return productMapper.findProducts(keyword, categoryId, minPrice, maxPrice, orderBy);
     }
 
-    /**
-     * 【最终优化】
-     * 重新启用了 @Cacheable 注解。
-     * 现在，当此方法被调用时，它会首先根据 productId 在名为 "product" 的缓存中查找。
-     * 只有当缓存中没有对应ID的商品时，才会去查询数据库。
-     */
     @Override
     @Cacheable(value = "product", key = "#productId")
     public Product getProductById(String productId) {
-        log.info(">>> [缓存未命中] 正在为商品ID {} 从数据库查询详情...", productId);
-        Product product = productMapper.findProductById(productId);
-        if (product == null) {
-            throw new CustomException("商品不存在或已下架");
-        }
-        return product;
+        return productMapper.findProductById(productId);
     }
 
-    /**
-     * @CacheEvict 会在方法执行后，清除指定的缓存。
-     * allEntries = true 表示清除 "products" 缓存中的所有条目。
-     * 这确保了在新增商品后，首页的商品列表缓存会被清空，从而能显示出最新的商品。
-     */
     @Override
-    @CacheEvict(value = "products", allEntries = true)
-    public Product createProduct(Product product, String sellerId) {
+    @Transactional
+    public Product createProduct(ProductDTO productDTO, String sellerId) {
+        Product product = new Product();
+        product.setTitle(productDTO.getTitle());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setCategoryId(productDTO.getCategoryId());
+        product.setConditionLevel(productDTO.getConditionLevel());
+        product.setCoverImage(productDTO.getCoverImage());
         product.setSellerId(sellerId);
-        productMapper.insertProduct(product);
-        return product;
-    }
 
-    /**
-     * 同时清除两个缓存：
-     * "product::#product.id": 清除这个特定ID的商品详情缓存。
-     * "products": 清除整个商品列表的缓存。
-     */
-    @Override
-    @CacheEvict(value = {"product", "products"}, key = "#product.id", allEntries = true)
-    public Product updateProduct(Product product, String currentUserId) {
-        Product existingProduct = productMapper.findProductById(product.getId());
-        if (existingProduct == null) {
-            throw new CustomException("商品不存在");
+        productMapper.insertProduct(product);
+
+        List<String> imageUrls = productDTO.getImageUrls();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            productImageMapper.batchInsert(product.getId(), imageUrls);
         }
-        if (!Objects.equals(existingProduct.getSellerId(), currentUserId)) {
-            throw new CustomException("无权修改他人的商品");
-        }
-        productMapper.updateProduct(product);
+
         return productMapper.findProductById(product.getId());
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {"product::#productId", "products"}, allEntries = true)
-    public void updateProductStatus(String productId, String status, String currentUserId) {
+    public Product updateProduct(String productId, ProductDTO productDTO, String currentUserId) {
         Product existingProduct = productMapper.findProductById(productId);
         if (existingProduct == null) {
             throw new CustomException("商品不存在");
         }
-        // 这个方法现在只给普通用户使用，所以只检查所有权
         if (!Objects.equals(existingProduct.getSellerId(), currentUserId)) {
             throw new CustomException("无权修改他人的商品");
         }
-        productMapper.updateProductStatus(productId, status);
+
+        existingProduct.setTitle(productDTO.getTitle());
+        existingProduct.setDescription(productDTO.getDescription());
+        existingProduct.setPrice(productDTO.getPrice());
+        existingProduct.setCategoryId(productDTO.getCategoryId());
+        existingProduct.setConditionLevel(productDTO.getConditionLevel());
+        if (productDTO.getCoverImage() != null && !productDTO.getCoverImage().isEmpty()) {
+            existingProduct.setCoverImage(productDTO.getCoverImage());
+        }
+
+        productMapper.updateProduct(existingProduct);
+
+        productImageMapper.deleteByProductId(productId);
+        if (!CollectionUtils.isEmpty(productDTO.getImageUrls())) {
+            productImageMapper.batchInsert(productId, productDTO.getImageUrls());
+        }
+
+        return productMapper.findProductById(productId);
     }
 
-    // 【新增】管理员调用的方法，直接更新状态，不再进行用户ID的比较
     @Override
     @CacheEvict(value = {"product::#productId", "products"}, allEntries = true)
-    public void updateProductStatusAsAdmin(String productId, String status) {
+    public void updateProductStatus(String productId, String status, AuthenticatedUser user) {
+        Product existingProduct = productMapper.findProductById(productId);
+        if (existingProduct == null) {
+            throw new CustomException("商品不存在");
+        }
+
+        log.info(">>> [权限诊断] 正在为用户 '{}' (ID: {}) 更新商品状态...", user.getUsername(), user.getUserId());
+        String authoritiesString = user.getAuthorities().stream()
+                .map(auth -> auth.getAuthority())
+                .collect(Collectors.joining(", "));
+        log.info(">>> [权限诊断] 该用户持有的权限为: [{}]", authoritiesString);
+
+        boolean isAdmin = user.getAuthorities().stream()
+                .anyMatch(auth -> "ROLE_ADMIN".equals(auth.getAuthority()));
+
+        log.info(">>> [权限诊断] isAdmin 检查结果为: {}", isAdmin);
+
+        if (!isAdmin && !Objects.equals(existingProduct.getSellerId(), user.getUserId())) {
+            throw new CustomException("无权修改他人的商品");
+        }
+
+        log.info(">>> [权限诊断] 权限检查通过，正在执行数据库更新...");
         productMapper.updateProductStatus(productId, status);
     }
 
@@ -112,11 +136,9 @@ public class ProductServiceImpl implements ProductService {
         return new PageResult<>(productPage);
     }
 
-    // 【新增】获取推荐商品的方法实现
     @Override
-    @Cacheable(value = "recommendations", key = "#productId") // 对推荐结果进行缓存
+    @Cacheable(value = "recommendations", key = "#productId")
     public List<Product> getRecommendedProducts(String productId) {
-        // 推荐5个商品
         return productMapper.findRecommendedProducts(productId, 5);
     }
 }

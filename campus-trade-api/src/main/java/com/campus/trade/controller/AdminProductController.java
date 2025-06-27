@@ -38,9 +38,10 @@ public class AdminProductController {
     @PutMapping("/{id}/status")
     public Result<Void> updateProductStatus(
             @PathVariable String id,
-            @RequestBody Map<String, String> payload) {
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal AuthenticatedUser user) {
         String status = payload.get("status");
-        productService.updateProductStatusAsAdmin(id, status);
+        productService.updateProductStatus(id, status, user);
         return Result.success();
     }
 }
