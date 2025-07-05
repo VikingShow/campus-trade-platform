@@ -39,6 +39,16 @@ export const deleteProductAdmin = (id) => {
 export const getAllOrdersAdmin = (params) => {
     return apiClient.get('/admin/orders', { params });
 };
+export const updateOrderByAdmin = (id, data) => {
+    return apiClient.put(`/admin/orders/${id}`, data);
+};
+export const deleteOrderAdmin = (id) => {
+    return apiClient.delete(`/admin/orders/${id}`);
+};
+export const createOrderByAdmin = (data) => {
+    return apiClient.post('/admin/orders', data);
+};
+
 
 // --- Location Management ---
 export const getAllLocationsAdmin = () => { return apiClient.get('/admin/locations'); };

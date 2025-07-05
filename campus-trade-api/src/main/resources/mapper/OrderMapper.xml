@@ -69,4 +69,18 @@
     <select id="countTotalOrders" resultType="long">
         SELECT COUNT(*) FROM orders
     </select>
+
+    <update id="updateOrderByAdmin">
+        UPDATE orders
+        <set>
+            <if test="orderStatus != null and orderStatus != ''"> order_status = #{orderStatus}, </if>
+            <if test="meetupLocationId != null"> meetup_location_id = #{meetupLocationId}, </if>
+            <if test="meetupTimeSlot != null"> meetup_time_slot = #{meetupTimeSlot}, </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM orders WHERE id = #{orderId}
+    </delete>
 </mapper>

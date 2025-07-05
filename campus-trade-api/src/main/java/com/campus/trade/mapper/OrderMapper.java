@@ -18,4 +18,8 @@ public interface OrderMapper {
 
     long countTotalOrders();
 
+    void deleteById(String orderId);
+
+    void updateOrderByAdmin(Order order);
+
 }

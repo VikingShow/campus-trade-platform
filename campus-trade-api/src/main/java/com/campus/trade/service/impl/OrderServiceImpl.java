@@ -1,5 +1,7 @@
 package com.campus.trade.service.impl;
 
+import com.campus.trade.dto.AdminOrderCreateDTO;
+import com.campus.trade.dto.AdminOrderUpdateDTO;
 import com.campus.trade.dto.CreateOrderDTO;
 import com.campus.trade.dto.PageResult;
 import com.campus.trade.entity.Order;
@@ -111,4 +113,101 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orderList = orderMapper.findAllForAdmin(orderId);
         return new PageResult<>(orderList);
     }
+
+    /**
+     * 【新增】为管理员提供的更新订单状态方法。
+     * 它不进行任何权限检查，因为管理员有权修改任何订单状态。
+     */
+    @Override
+    @CacheEvict(value = {"order::#orderId", "product"}, allEntries = true)
+    public void updateOrderStatusByAdmin(String orderId, String status) {
+        orderMapper.updateOrderStatus(orderId, status);
+        // 如果订单被管理员取消，也应该恢复商品状态
+        if ("CANCELLED".equals(status)) {
+            Order order = orderMapper.findOrderById(orderId);
+            if (order != null) {
+                productMapper.updateProductStatus(order.getProductId(), "AVAILABLE");
+            }
+        }
+    }
+
+    /**
+     * 【新增】为管理员提供的删除订单方法。
+     */
+    @Override
+    @CacheEvict(value = {"order::#orderId", "product"}, allEntries = true)
+    public void deleteOrder(String orderId) {
+        orderMapper.deleteById(orderId);
+    }
+
+    /**
+     * 【新增】为管理员提供的更新订单详情方法。
+     */
+    @Override
+    @CacheEvict(value = "order", key = "#orderId")
+    public Order updateOrderByAdmin(String orderId, AdminOrderUpdateDTO orderDTO) {
+        Order orderToUpdate = orderMapper.findOrderById(orderId);
+        if (orderToUpdate == null) {
+            throw new CustomException("订单不存在");
+        }
+
+        // 检查并恢复商品状态
+        if ("CANCELLED".equals(orderDTO.getOrderStatus()) && !"CANCELLED".equals(orderToUpdate.getOrderStatus())) {
+            productMapper.updateProductStatus(orderToUpdate.getProductId(), "AVAILABLE");
+        } else if (!"CANCELLED".equals(orderDTO.getOrderStatus()) && "CANCELLED".equals(orderToUpdate.getOrderStatus())) {
+            productMapper.updateProductStatus(orderToUpdate.getProductId(), "SOLD");
+        }
+
+        orderToUpdate.setOrderStatus(orderDTO.getOrderStatus());
+        orderToUpdate.setTotalPrice(orderDTO.getTotalPrice());
+        orderToUpdate.setMeetupLocationId(orderDTO.getMeetupLocationId());
+        orderToUpdate.setMeetupTimeSlot(orderDTO.getMeetupTimeSlot());
+
+        orderMapper.updateOrderByAdmin(orderToUpdate);
+        return orderMapper.findOrderById(orderId);
+    }
+
+    /**
+     * 【新增】为管理员创建订单的方法实现。
+     * 它会进行必要的校验，如商品是否存在、买家与卖家是否为同一人等。
+     */
+    @Override
+    @Transactional
+    @CacheEvict(value = {"products", "product::*"}, allEntries = true)
+    public Order createOrderByAdmin(AdminOrderCreateDTO orderDTO) {
+        if (orderDTO.getProductId() == null || orderDTO.getBuyerId() == null) {
+            throw new CustomException("必须同时选择商品和买家");
+        }
+
+        Product product = productMapper.findProductById(orderDTO.getProductId());
+        if (product == null) {
+            throw new CustomException("选择的商品不存在");
+        }
+        if (!"AVAILABLE".equals(product.getStatus())) {
+            throw new CustomException("该商品已售出或已下架，无法创建订单");
+        }
+        if (Objects.equals(product.getSellerId(), orderDTO.getBuyerId())) {
+            throw new CustomException("买家和卖家不能是同一个人");
+        }
+
+        Order order = new Order();
+        order.setProductId(product.getId());
+        order.setBuyerId(orderDTO.getBuyerId());
+        order.setSellerId(product.getSellerId());
+        order.setOrderStatus("AWAITING_MEETUP");
+        order.setTotalPrice(product.getPrice());
+        order.setDeliveryMethod("ON_CAMPUS_MEETUP");
+        order.setMeetupLocationId(orderDTO.getMeetupLocationId());
+        order.setMeetupTimeSlot(orderDTO.getMeetupTimeSlot());
+
+        orderMapper.insertOrder(order);
+
+        productMapper.updateProductStatus(product.getId(), "SOLD");
+
+        String notificationContent = String.format("管理员为您创建了一笔新的订单，商品为：“%s”", product.getTitle());
+        notificationService.createNotification(product.getSellerId(), "NEW_ORDER", notificationContent, order.getId());
+
+        return orderMapper.findOrderById(order.getId());
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.campus.trade.service;
 
+import com.campus.trade.dto.AdminOrderCreateDTO;
+import com.campus.trade.dto.AdminOrderUpdateDTO;
 import com.campus.trade.dto.CreateOrderDTO;
 import com.campus.trade.dto.PageResult; // 【新增】
 import com.campus.trade.entity.Order;
@@ -14,4 +16,9 @@ public interface OrderService {
 
     // 【修改】为管理员查询所有订单的方法，增加分页参数
     PageResult<Order> findAllOrdersForAdmin(String orderId, Integer page, Integer size);
+
+    void updateOrderStatusByAdmin(String orderId, String status);
+    void deleteOrder(String orderId);
+    Order updateOrderByAdmin(String orderId, AdminOrderUpdateDTO orderDTO);
+    Order createOrderByAdmin(AdminOrderCreateDTO orderDTO);
 }
