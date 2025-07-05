@@ -1,9 +1,6 @@
 package com.campus.trade.service.impl;
 
-import com.campus.trade.dto.LoginDTO;
-import com.campus.trade.dto.RegisterDTO;
-import com.campus.trade.dto.UserProfileDTO;
-import com.campus.trade.dto.UserProfileUpdateDTO;
+import com.campus.trade.dto.*;
 import com.campus.trade.entity.User;
 import com.campus.trade.exception.CustomException;
 import com.campus.trade.mapper.UserMapper;
@@ -13,7 +10,6 @@ import com.campus.trade.service.UserService;
 import com.campus.trade.service.impl.EmailServiceImpl; // 【新增】
 import org.springframework.data.redis.core.StringRedisTemplate; // 【新增】
 
-import com.campus.trade.dto.PageResult; // 【新增】
 import com.github.pagehelper.Page; // 【新增】
 import com.github.pagehelper.PageHelper; // 【新增】
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +21,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -96,11 +95,16 @@ public class UserServiceImpl implements UserService {
 
         final String token = jwtUtil.generateToken(authenticatedUser);
 
+        // 【修改】登录成功后，返回更完整的用户信息
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
-        response.put("nickname", authenticatedUser.getNickname());
         response.put("id", authenticatedUser.getUserId());
-        response.put("avatar", authenticatedUser.getAvatar()); // 【新增】在响应中加入头像
+        response.put("username", authenticatedUser.getUsername()); // 返回学号
+        response.put("nickname", authenticatedUser.getNickname());
+        response.put("avatar", authenticatedUser.getAvatar());
+        // 注意：我们从数据库完整的User对象中获取bio
+        User fullUser = userMapper.findById(authenticatedUser.getUserId());
+        response.put("bio", fullUser.getBio());
         return response;
     }
 
@@ -129,18 +133,58 @@ public class UserServiceImpl implements UserService {
         }
         userToUpdate.setNickname(profileDTO.getNickname());
         userToUpdate.setAvatar(profileDTO.getAvatar());
+        userToUpdate.setBio(profileDTO.getBio()); // 更新简介
         userMapper.updateProfile(userToUpdate);
-        // 返回更新后的完整用户信息
         return userMapper.findById(userId);
     }
 
     @Override
-    public PageResult<User> findAllUsers(Integer page, Integer size) {
-        // 1. 设置分页参数
+    public PageResult<User> findAllUsers(String keyword, String role, Integer status, Integer page, Integer size) {
         PageHelper.startPage(page, size);
-        // 2. 正常执行查询，PageHelper会自动拦截这条SQL，并为其附加分页逻辑
-        Page<User> userPage = (Page<User>) userMapper.findAll();
-        // 3. 将查询结果封装成我们自定义的 PageResult 对象
-        return new PageResult<>(userPage);
+        // 【修改】将所有筛选参数传递给 Mapper
+        List<User> userList = userMapper.findAll(keyword, role, status);
+        return new PageResult<>(userList);
+    }
+
+    @Override
+    @Transactional
+    public User createUserByAdmin(AdminUserDTO userDTO) {
+        if (userMapper.findByUsername(userDTO.getUsername()) != null) {
+            throw new CustomException("用户名（学号）已存在");
+        }
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setNickname(userDTO.getNickname());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(userDTO.getRole());
+        user.setStatus(1); // 默认启用
+        userMapper.insertUser(user);
+        return user;
+    }
+
+    @Override
+    @Transactional
+    public User updateUserByAdmin(String userId, AdminUserDTO userDTO) {
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            throw new CustomException("用户不存在");
+        }
+        user.setNickname(userDTO.getNickname());
+        user.setRole(userDTO.getRole());
+        user.setCreditScore(userDTO.getCreditScore());
+        // 如果提供了新密码，则更新密码
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+        userMapper.updateUserByAdmin(user);
+        return user;
+    }
+
+    @Override
+    public void deleteUser(String userId, String currentAdminId) {
+        if (Objects.equals(userId, currentAdminId)) {
+            throw new CustomException("不能删除自己");
+        }
+        userMapper.deleteById(userId);
     }
 }

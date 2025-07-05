@@ -9,17 +9,17 @@ public class User implements Serializable {
     private String id;
     private String username;
     private String password;
-    private String email; // 【新增】
-    private boolean emailVerified; // 【新增】
+    private String email;
+    private boolean emailVerified;
     private String nickname;
     private String role;
     private Integer creditScore;
+    private String bio; // 【新增】
     private String avatar;
     private Integer status;
     private Date createTime;
 
     // --- Getters and Setters ---
-
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getUsername() { return username; }
@@ -36,6 +36,8 @@ public class User implements Serializable {
     public void setRole(String role) { this.role = role; }
     public Integer getCreditScore() { return creditScore; }
     public void setCreditScore(Integer creditScore) { this.creditScore = creditScore; }
+    public String getBio() { return bio; } // 【新增】
+    public void setBio(String bio) { this.bio = bio; } // 【新增】
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
     public Integer getStatus() { return status; }

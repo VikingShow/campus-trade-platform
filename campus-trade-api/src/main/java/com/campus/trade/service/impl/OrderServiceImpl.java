@@ -107,7 +107,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageResult<Order> findAllOrdersForAdmin(String orderId, Integer page, Integer size) {
         PageHelper.startPage(page, size);
-        Page<Order> orderPage = (Page<Order>) orderMapper.findAllForAdmin(orderId);
-        return new PageResult<>(orderPage);
+        // 【最终修正】采用与 UserServiceImpl 完全一致的、更健壮的实现方式
+        List<Order> orderList = orderMapper.findAllForAdmin(orderId);
+        return new PageResult<>(orderList);
     }
 }

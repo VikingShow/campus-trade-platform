@@ -1,10 +1,6 @@
 package com.campus.trade.service;
 
-import com.campus.trade.dto.LoginDTO;
-import com.campus.trade.dto.RegisterDTO;
-import com.campus.trade.dto.UserProfileDTO; // 【新增】
-import com.campus.trade.dto.PageResult; // 【新增】
-import com.campus.trade.dto.UserProfileUpdateDTO;
+import com.campus.trade.dto.*;
 import com.campus.trade.entity.User;
 import java.util.List;
 import java.util.Map;
@@ -18,5 +14,9 @@ public interface UserService {
     UserProfileDTO findUserPublicProfile(String userId);
     User updateUserProfile(String userId, UserProfileUpdateDTO profileDTO);
 
-    PageResult<User> findAllUsers(Integer page, Integer size);
+    PageResult<User> findAllUsers(String keyword, String role, Integer status, Integer page, Integer size);
+    User createUserByAdmin(AdminUserDTO userDTO);
+    User updateUserByAdmin(String userId, AdminUserDTO userDTO);
+    void deleteUser(String userId, String currentAdminId);
+
 }

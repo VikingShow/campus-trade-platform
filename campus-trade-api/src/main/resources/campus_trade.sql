@@ -141,3 +141,6 @@ INSERT INTO `meetup_location` (`name`, `description`) VALUES ('图书馆正门',
 ALTER TABLE `user`
     ADD COLUMN `email` VARCHAR(255) NULL UNIQUE COMMENT '用户邮箱' AFTER `password`,
     ADD COLUMN `email_verified` BOOLEAN NOT NULL DEFAULT FALSE COMMENT '邮箱是否已验证' AFTER `email`;
+
+ALTER TABLE `user`
+    ADD COLUMN `bio` TEXT NULL COMMENT '个人简介' AFTER `credit_score`;

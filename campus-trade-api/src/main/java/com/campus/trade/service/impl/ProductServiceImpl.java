@@ -146,8 +146,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResult<Product> findAllProductsForAdmin(String keyword, Integer page, Integer size) {
         PageHelper.startPage(page, size);
-        Page<Product> productPage = (Page<Product>) productMapper.findAllForAdmin(keyword);
-        return new PageResult<>(productPage);
+        // 【最终修正】采用与 UserServiceImpl 完全一致的、更健壮的实现方式
+        List<Product> productList = productMapper.findAllForAdmin(keyword);
+        return new PageResult<>(productList);
     }
 
     @Override

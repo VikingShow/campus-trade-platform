@@ -1,105 +1,136 @@
 <template>
-  <div v-if="!loading && user" class="user-profile">
-    <el-card>
-      <div class="profile-header">
-        <el-avatar :size="80" :src=user.avatar icon="UserFilled" />
-        <div class="profile-info">
-          <h2>{{ user.nickname }}</h2>
-          <el-tag effect="dark" round size="large">
-            <el-icon><Finished/></el-icon>
-            信誉分: {{ user.creditScore }}
-          </el-tag>
+    <div>
+        <div class="profile-header">
+            <h3>个人信息</h3>
+            <el-button type="primary" :icon="Edit" circle @click="openDialog" />
         </div>
-      </div>
-    </el-card>
+        <el-descriptions :column="1" border>
+            <!-- 【最终修正】显示学号而不是ID -->
+            <el-descriptions-item label="学号">{{ authStore.user?.username }}</el-descriptions-item>
+            <el-descriptions-item label="昵称">{{ authStore.user?.nickname }}</el-descriptions-item>
+            <el-descriptions-item label="头像">
+                <el-avatar :size="60" :icon="UserFilled" :src="authStore.user?.avatar" />
+            </el-descriptions-item>
+            <el-descriptions-item label="邮箱">{{ authStore.user?.email }}</el-descriptions-item>
+            <el-descriptions-item label="个人简介">
+                {{ authStore.user?.bio || '这位同学很神秘，什么都还没留下...' }}
+            </el-descriptions-item>
+        </el-descriptions>
 
-    <el-card style="margin-top: 20px;">
-      <template #header>
-        <h3>收到的评价 ({{ ratings.length }})</h3>
-      </template>
-      <div v-if="ratings.length > 0">
-        <div v-for="rating in ratings" :key="rating.id" class="rating-item">
-          <div class="rating-header">
-            <el-avatar :size="40" :src=rating.raterAvatar icon="UserFilled" />
-            <span class="rater-name">{{ rating.raterNickname }}</span>
-            <el-rate v-model="rating.score" disabled style="margin-left: auto;" />
-          </div>
-          <p class="rating-comment">{{ rating.comment || '该用户没有填写评价内容。' }}</p>
-          
-          <!-- 【新增】展示关联的商品信息，并提供跳转链接 -->
-          <div class="product-info">
-            <span>评价于商品：</span>
-            <router-link :to="`/product/${rating.productId}`" class="product-link">
-              {{ rating.productTitle }}
-            </router-link>
-          </div>
-
-          <div class="rating-time">{{ new Date(rating.createTime).toLocaleString() }}</div>
-        </div>
-      </div>
-      <el-empty v-else description="暂无评价记录"></el-empty>
-    </el-card>
-  </div>
-  <el-skeleton v-else :rows="5" animated />
+        <!-- 编辑个人信息的对话框 -->
+        <el-dialog v-model="dialogVisible" title="编辑个人信息" width="500px" @close="resetForm">
+            <el-form :model="form" ref="formRef" label-width="80px">
+                <el-form-item label="新头像">
+                    <el-upload
+                        class="avatar-uploader"
+                        action="/api/files/upload"
+                        :show-file-list="false"
+                        :on-success="handleAvatarSuccess"
+                        :headers="{ 'Authorization': `Bearer ${authStore.token}` }"
+                    >
+                        <img v-if="form.avatar" :src="form.avatar" class="avatar" />
+                        <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="新昵称" prop="nickname">
+                    <el-input v-model="form.nickname" />
+                </el-form-item>
+                <el-form-item label="个人简介" prop="bio">
+                    <el-input v-model="form.bio" type="textarea" :rows="3" maxlength="100" show-word-limit />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button @click="dialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
+            </template>
+        </el-dialog>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { getUserInfo, getUserRatings } from '../api/user';
-import { UserFilled, Finished } from '@element-plus/icons-vue';
+import { ref, reactive } from 'vue';
+import { useAuthStore } from '../stores/authStore';
+import { UserFilled, Edit, Plus } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
-const props = defineProps({ id: String });
-const user = ref(null);
-const ratings = ref([]);
-const loading = ref(true);
+const authStore = useAuthStore();
+const dialogVisible = ref(false);
+const submitting = ref(false);
+const formRef = ref(null);
 
-// const backendUrl = 'http://localhost:8080';
-
-// const fullImageUrl = (relativePath) => {
-//     if (!relativePath) return '';
-//     if (relativePath.startsWith('http')) return relativePath;
-//     return `${backendUrl}${relativePath}`;
-// };
-
-onMounted(async () => {
-  loading.value = true;
-  try {
-    const [userRes, ratingsRes] = await Promise.all([
-      getUserInfo(props.id),
-      getUserRatings(props.id)
-    ]);
-    user.value = userRes.data.data;
-    ratings.value = ratingsRes.data.data;
-  } catch (error) {
-    console.error("加载用户主页失败:", error);
-  } finally {
-    loading.value = false;
-  }
+const form = reactive({
+  nickname: '',
+  avatar: '',
+  bio: ''
 });
+
+const openDialog = () => {
+  // 打开对话框时，用当前用户信息填充表单
+  form.nickname = authStore.user?.nickname || '';
+  form.avatar = authStore.user?.avatar || '';
+  form.bio = authStore.user?.bio || '';
+  dialogVisible.value = true;
+};
+
+const handleAvatarSuccess = (response) => {
+  form.avatar = response.data.url;
+  ElMessage.success('头像上传成功');
+};
+
+const resetForm = () => {
+    if (formRef.value) {
+        formRef.value.resetFields();
+    }
+};
+
+const handleSubmit = async () => {
+  submitting.value = true;
+  try {
+    const success = await authStore.updateUserProfile(form);
+    if (success) {
+      dialogVisible.value = false;
+      ElMessage({
+        message: '个人信息更新成功！',
+        type: 'success',
+        duration: 1500,
+      });
+    } else {
+      ElMessage.error('更新失败，请稍后重试');
+    }
+  } finally {
+    submitting.value = false;
+  }
+};
 </script>
 
-<style scoped>
-.profile-header { display: flex; align-items: center; gap: 20px; }
-.profile-info h2 { margin: 0 0 10px 0; }
-.rating-item { padding: 15px 0; border-bottom: 1px solid #e4e7ed; }
-.rating-item:last-child { border-bottom: none; }
-.rating-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.rater-name { font-weight: bold; }
-.rating-comment { color: #303133; margin: 10px 0; }
-.product-info {
-  font-size: 13px;
-  color: #606266;
-  background-color: #f4f4f5;
-  padding: 5px 10px;
-  border-radius: 4px;
-  display: inline-block;
+<style>
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
-.product-link {
-  color: var(--el-color-primary);
-  text-decoration: none;
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
 }
-.product-link:hover {
-  text-decoration: underline;
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
 }
-.rating-time { font-size: 12px; color: #909399; text-align: right; margin-top: 10px; }
+.avatar {
+  width: 120px;
+  height: 120px;
+  display: block;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  text-align: center;
+}
 </style>

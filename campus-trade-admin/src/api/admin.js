@@ -35,3 +35,13 @@ export const getSummaryStats = () => {
 export const getDailyRegistrationStats = () => {
     return apiClient.get('/admin/stats/daily-registrations');
 };
+
+export const createUserAdmin = (data) => {
+    return apiClient.post('/admin/users', data);
+};
+export const updateUserAdmin = (id, data) => {
+    return apiClient.put(`/admin/users/${id}`, data);
+};
+export const deleteUserAdmin = (id) => {
+    return apiClient.delete(`/admin/users/${id}`);
+};

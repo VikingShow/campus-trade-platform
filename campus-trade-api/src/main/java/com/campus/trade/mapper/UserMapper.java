@@ -12,7 +12,7 @@ public interface UserMapper {
     void insertUser(User user);
 
     // 【新增】管理员用的Mapper方法
-    List<User> findAll();
+    List<User> findAll(@Param("keyword") String keyword, @Param("role") String role, @Param("status") Integer status);
     void updateUserStatus(@Param("id") String id, @Param("status") Integer status);
     User findById(String id);
     User findByEmail(String email); // 【新增】
@@ -24,4 +24,7 @@ public interface UserMapper {
 
     long countTotalUsers();
     List<DailyStatsDTO> countDailyRegistrations();
+
+    void updateUserByAdmin(User user);
+    void deleteById(String id);
 }

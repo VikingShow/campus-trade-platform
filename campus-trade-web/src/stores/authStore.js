@@ -36,9 +36,8 @@ export const useAuthStore = defineStore('auth', () => {
         const payload = { ...credentials };
         const response = await apiClient.post('/users/authenticate', payload);
         
-        // 【关键修正】从API响应中获取完整的用户信息，包括头像
-        const { token: apiToken, nickname, id, avatar } = response.data.data;
-        const userInfo = { nickname, id, avatar };
+        // 【最终修正】从API响应中获取完整的用户信息，并直接使用
+        const { token: apiToken, ...userInfo } = response.data.data;
 
         setAuth({ token: apiToken, user: userInfo });
         await fetchFavoriteIds();
@@ -63,7 +62,9 @@ export const useAuthStore = defineStore('auth', () => {
             const currentUserInfo = { 
                 nickname: updatedUser.nickname, 
                 id: updatedUser.id, 
-                avatar: updatedUser.avatar 
+                avatar: updatedUser.avatar ,
+                bio: updatedUser.bio
+
             };
             setAuth({ token: token.value, user: currentUserInfo });
             return true;
@@ -105,6 +106,26 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // 【新增】一个专门用于更新本地用户信息的 action
+    async function updateUserProfile(profileData) {
+        try {
+            const response = await updateMyProfile(profileData);
+            const updatedUser = response.data.data;
+            
+            // 更新Pinia和localStorage中的用户信息
+            const currentUserInfo = { 
+                ...user.value, // 保留旧信息，如id, username等
+                nickname: updatedUser.nickname, 
+                avatar: updatedUser.avatar,
+                bio: updatedUser.bio
+            };
+            setAuth({ token: token.value, user: currentUserInfo });
+            return true;
+        } catch (error) {
+            console.error("更新个人信息失败:", error);
+            return false;
+        }
+    }
     return { 
         token, user, isAuthenticated, setAuth, logout, login, register, updateUserProfile,
         favoriteIds, fetchFavoriteIds, addToFavorites, removeFromFavorites

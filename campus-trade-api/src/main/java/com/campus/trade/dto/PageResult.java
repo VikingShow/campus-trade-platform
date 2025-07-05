@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 一个通用的分页结果封装类，用于向前端返回统一格式的分页数据
+ * 【最终修正】一个更健壮、通用的分页结果封装类
  * @param <T>
  */
 public class PageResult<T> implements Serializable {
@@ -14,12 +14,21 @@ public class PageResult<T> implements Serializable {
     private List<T> list;   // 当前页的数据列表
 
     /**
-     * 一个方便的构造方法，可以直接从 PageHelper 的 Page 对象转换
-     * @param page mybatis-pagehelper查询后返回的page对象
+     * 这个构造函数现在可以接收一个 List。
+     * 它会自动检查这个 List 是否是 PageHelper 返回的 Page 对象。
+     * 如果是，它会提取出总数和数据列表。
+     * 如果不是，它会把列表的大小作为总数。
+     * 这种设计使得调用方无需再进行强制类型转换，代码更简洁、更安全。
      */
-    public PageResult(Page<T> page) {
-        this.total = page.getTotal();
-        this.list = page.getResult();
+    public PageResult(List<T> list) {
+        if (list instanceof Page) {
+            Page<T> page = (Page<T>) list;
+            this.total = page.getTotal();
+            this.list = page.getResult();
+        } else {
+            this.total = list.size();
+            this.list = list;
+        }
     }
 
     // --- Getters and Setters ---
