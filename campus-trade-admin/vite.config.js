@@ -12,7 +12,7 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       },
-      // 【新增】在本地开发时，也将图片请求代理到后端
+      // 【最终修正】在本地开发时，也将图片请求代理到后端
       '/uploads': {
         target: 'http://localhost:8080',
         changeOrigin: true,

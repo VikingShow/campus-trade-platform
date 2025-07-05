@@ -144,4 +144,8 @@
         ORDER BY recommendation_score DESC
         LIMIT #{limit}
     </select>
+
+    <delete id="deleteById">
+        DELETE FROM product WHERE id = #{productId}
+    </delete>
 </mapper>

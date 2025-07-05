@@ -7,6 +7,15 @@ export const getAllUsers = (params) => {
 export const updateUserStatus = (id, status) => {
     return apiClient.put(`/admin/users/${id}/status`, { status });
 };
+export const createUserAdmin = (data) => {
+    return apiClient.post('/admin/users', data);
+};
+export const updateUserAdmin = (id, data) => {
+    return apiClient.put(`/admin/users/${id}`, data);
+};
+export const deleteUserAdmin = (id) => {
+    return apiClient.delete(`/admin/users/${id}`);
+};
 
 // --- Product Management ---
 export const getAllProductsAdmin = (params) => {
@@ -14,6 +23,15 @@ export const getAllProductsAdmin = (params) => {
 };
 export const updateProductStatusAdmin = (id, status) => {
     return apiClient.put(`/admin/products/${id}/status`, { status });
+};
+export const createProductByAdmin = (data) => {
+    return apiClient.post('/admin/products', data);
+};
+export const updateProductByAdmin = (id, data) => {
+    return apiClient.put(`/admin/products/${id}`, data);
+};
+export const deleteProductAdmin = (id) => {
+    return apiClient.delete(`/admin/products/${id}`);
 };
 
 // --- Order Management ---
@@ -36,12 +54,4 @@ export const getDailyRegistrationStats = () => {
     return apiClient.get('/admin/stats/daily-registrations');
 };
 
-export const createUserAdmin = (data) => {
-    return apiClient.post('/admin/users', data);
-};
-export const updateUserAdmin = (id, data) => {
-    return apiClient.put(`/admin/users/${id}`, data);
-};
-export const deleteUserAdmin = (id) => {
-    return apiClient.delete(`/admin/users/${id}`);
-};
+

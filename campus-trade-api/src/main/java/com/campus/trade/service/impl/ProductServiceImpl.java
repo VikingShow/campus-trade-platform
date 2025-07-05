@@ -1,5 +1,6 @@
 package com.campus.trade.service.impl;
 
+import com.campus.trade.dto.AdminProductDTO;
 import com.campus.trade.dto.PageResult;
 import com.campus.trade.dto.ProductDTO;
 import com.campus.trade.entity.Product;
@@ -155,5 +156,65 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(value = "recommendations", key = "#productId")
     public List<Product> getRecommendedProducts(String productId) {
         return productMapper.findRecommendedProducts(productId, 5);
+    }
+
+    /**
+     * 【新增】为管理员提供的更新方法。
+     * 它不检查当前用户是否是商品所有者，因为管理员有权编辑任何商品。
+     */
+    @Override
+    @Transactional
+    @CacheEvict(value = {"product::#productId", "products"}, allEntries = true)
+    public Product updateProductByAdmin(String productId, ProductDTO productDTO) {
+        Product existingProduct = productMapper.findProductById(productId);
+        if (existingProduct == null) {
+            throw new CustomException("商品不存在");
+        }
+
+        existingProduct.setTitle(productDTO.getTitle());
+        existingProduct.setDescription(productDTO.getDescription());
+        existingProduct.setPrice(productDTO.getPrice());
+        existingProduct.setCategoryId(productDTO.getCategoryId());
+        existingProduct.setConditionLevel(productDTO.getConditionLevel());
+
+        productMapper.updateProduct(existingProduct);
+        return productMapper.findProductById(productId);
+    }
+
+    /**
+     * 【新增】为管理员提供的删除方法。
+     * 注意：这将永久删除商品及其所有关联数据（如收藏、订单等，取决于数据库的外键级联设置）。
+     */
+    @Override
+    @CacheEvict(value = {"product::#productId", "products"}, allEntries = true)
+    public void deleteProduct(String productId) {
+        productMapper.deleteById(productId);
+    }
+
+    /**
+     * 【新增】为管理员创建商品的方法实现。
+     * 它直接使用 DTO 中提供的 sellerId。
+     */
+    @Override
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public Product createProductByAdmin(AdminProductDTO adminProductDTO) {
+        Product product = new Product();
+        product.setTitle(adminProductDTO.getTitle());
+        product.setDescription(adminProductDTO.getDescription());
+        product.setPrice(adminProductDTO.getPrice());
+        product.setCategoryId(adminProductDTO.getCategoryId());
+        product.setConditionLevel(adminProductDTO.getConditionLevel());
+        product.setCoverImage(adminProductDTO.getCoverImage());
+        product.setSellerId(adminProductDTO.getSellerId()); // 使用指定的卖家ID
+
+        productMapper.insertProduct(product);
+
+        List<String> imageUrls = adminProductDTO.getImageUrls();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            productImageMapper.batchInsert(product.getId(), imageUrls);
+        }
+
+        return productMapper.findProductById(product.getId());
     }
 }

@@ -26,4 +26,6 @@ public interface ProductMapper {
     // 【新增】基于协同过滤的商品推荐查询
     List<Product> findRecommendedProducts(@Param("productId") String productId, @Param("limit") int limit);
 
+    void deleteById(String productId);
+
 }

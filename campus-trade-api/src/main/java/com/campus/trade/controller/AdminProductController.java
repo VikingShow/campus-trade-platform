@@ -1,7 +1,9 @@
 package com.campus.trade.controller;
 
 import com.campus.trade.common.Result;
+import com.campus.trade.dto.AdminProductDTO;
 import com.campus.trade.dto.PageResult;
+import com.campus.trade.dto.ProductDTO;
 import com.campus.trade.entity.Product;
 import com.campus.trade.security.AuthenticatedUser;
 import com.campus.trade.service.ProductService;
@@ -43,5 +45,22 @@ public class AdminProductController {
         String status = payload.get("status");
         productService.updateProductStatus(id, status, user);
         return Result.success();
+    }
+    // 【新增】管理员更新商品详情的接口
+    @PutMapping("/{id}")
+    public Result<Product> updateProduct(@PathVariable String id, @RequestBody ProductDTO productDTO) {
+        return Result.success(productService.updateProductByAdmin(id, productDTO));
+    }
+
+    // 【新增】管理员删除商品的接口
+    @DeleteMapping("/{id}")
+    public Result<Void> deleteProduct(@PathVariable String id) {
+        productService.deleteProduct(id);
+        return Result.success();
+    }
+
+    @PostMapping
+    public Result<Product> createProduct(@RequestBody AdminProductDTO adminProductDTO) {
+        return Result.success(productService.createProductByAdmin(adminProductDTO));
     }
 }
