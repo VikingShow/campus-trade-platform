@@ -144,3 +144,24 @@ ALTER TABLE `user`
 
 ALTER TABLE `user`
     ADD COLUMN `bio` TEXT NULL COMMENT '个人简介' AFTER `credit_score`;
+
+CREATE TABLE `user_addresses` (
+                                  `id` BIGINT AUTO_INCREMENT,
+                                  `user_id` BIGINT NOT NULL COMMENT '所属用户ID',
+                                  `recipient_name` VARCHAR(100) NOT NULL COMMENT '收件人姓名',
+                                  `phone` VARCHAR(20) NOT NULL COMMENT '联系电话',
+                                  `province` VARCHAR(50) NOT NULL COMMENT '省份',
+                                  `city` VARCHAR(50) NOT NULL COMMENT '城市',
+                                  `district` VARCHAR(50) NOT NULL COMMENT '区/县',
+                                  `detailed_address` VARCHAR(255) NOT NULL COMMENT '详细地址',
+                                  `is_default` BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否为默认地址',
+                                  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                  PRIMARY KEY (`id`),
+                                  FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户收货地址表';
+
+ALTER TABLE `orders`
+    ADD COLUMN `shipping_address_id` BIGINT NULL COMMENT '收货地址ID' AFTER `meetup_time_slot`,
+    ADD COLUMN `shipping_provider` VARCHAR(50) NULL COMMENT '快递公司' AFTER `shipping_address_id`,
+    ADD COLUMN `tracking_number` VARCHAR(100) NULL COMMENT '快递单号' AFTER `shipping_provider`,
+    ADD CONSTRAINT `fk_order_address` FOREIGN KEY (`shipping_address_id`) REFERENCES `user_addresses`(`id`) ON DELETE SET NULL;

@@ -21,7 +21,8 @@ const routes = [
         { path: 'sales', name: 'MySales', component: () => import('../components/MySales.vue') },
         { path: 'profile', name: 'UserProfile', component: () => import('../components/UserProfile.vue') },
         // 【关键修正】这里是我的收藏页面的正确路由定义
-        { path: 'favorites', name: 'MyFavorites', component: () => import('../components/MyFavorites.vue'), meta: { title: '我的收藏' } }
+        { path: 'favorites', name: 'MyFavorites', component: () => import('../components/MyFavorites.vue'), meta: { title: '我的收藏' } },
+        { path: 'addresses', name: 'MyAddresses', component: () => import('../components/MyAddresses.vue'), meta: { title: '收货地址' } }
       ]
     },
     { path: '/user/:id', name: 'UserProfilePage', component: () => import('../views/UserProfilePage.vue'), props: true },
