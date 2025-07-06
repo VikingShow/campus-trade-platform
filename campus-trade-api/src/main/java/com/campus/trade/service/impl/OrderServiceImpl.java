@@ -3,7 +3,9 @@ package com.campus.trade.service.impl;
 import com.campus.trade.dto.AdminOrderCreateDTO;
 import com.campus.trade.dto.AdminOrderUpdateDTO;
 import com.campus.trade.dto.CreateOrderDTO;
+import com.campus.trade.dto.DeliveryStatsDTO;
 import com.campus.trade.dto.PageResult;
+import com.campus.trade.dto.ShipmentDTO;
 import com.campus.trade.entity.Order;
 import com.campus.trade.entity.Product;
 import com.campus.trade.exception.CustomException;
@@ -16,11 +18,14 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -80,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+//    @Caching
     @Cacheable(value = "order", key = "#orderId")
     public Order getOrderDetails(String orderId) {
         return orderMapper.findOrderById(orderId);
@@ -236,4 +242,62 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.findOrderById(order.getId());
     }
 
+    /**
+     * 获取配送统计数据
+     */
+    @Override
+    public DeliveryStatsDTO getDeliveryStats() {
+        Long awaitingShipment = orderMapper.countOrdersByStatus("AWAITING_SHIPMENT");
+        Long shipped = orderMapper.countOrdersByStatus("SHIPPED");
+        Long completed = orderMapper.countOrdersByStatus("COMPLETED");
+        Long total = orderMapper.countTotalOrders();
+        
+        return new DeliveryStatsDTO(awaitingShipment, shipped, completed, total);
+    }
+
+    /**
+     * 发货操作
+     */
+    @Override
+    @Transactional
+    @CacheEvict(value = "order", key = "#orderId")
+    public void shipOrder(String orderId, ShipmentDTO shipmentDTO) {
+        Order order = orderMapper.findOrderById(orderId);
+        if (order == null) {
+            throw new CustomException("订单不存在");
+        }
+        
+        if (!"AWAITING_SHIPMENT".equals(order.getOrderStatus())) {
+            throw new CustomException("订单状态不正确，无法发货");
+        }
+        
+        if (!"SHIPPING".equals(order.getDeliveryMethod())) {
+            throw new CustomException("该订单不是快递配送订单");
+        }
+        
+        // 更新订单状态和物流信息
+        order.setOrderStatus("SHIPPED");
+        order.setShippingProvider(shipmentDTO.getShippingProvider());
+        order.setTrackingNumber(shipmentDTO.getTrackingNumber());
+        
+        orderMapper.updateOrderByAdmin(order);
+        
+        // 发送通知给买家
+        String notificationContent = String.format("您的订单 %s 已发货，快递公司：%s，单号：%s", 
+            orderId, shipmentDTO.getShippingProvider(), shipmentDTO.getTrackingNumber());
+        notificationService.createNotification(order.getBuyerId(), "ORDER_SHIPPED", notificationContent, orderId);
+    }
+
+    /**
+     * 导出配送订单数据
+     */
+    @Override
+    public void exportDeliveryOrders(String orderId, String deliveryMethod, String orderStatus, HttpServletResponse response) throws IOException {
+        // 这里可以实现Excel导出功能，暂时返回空实现
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=delivery_orders.xlsx");
+        
+        // TODO: 实现Excel导出逻辑
+        response.getWriter().write("配送订单数据导出功能待实现");
+    }
 }

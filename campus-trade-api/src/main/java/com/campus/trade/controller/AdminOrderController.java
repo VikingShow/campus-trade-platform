@@ -4,6 +4,7 @@ import com.campus.trade.common.Result;
 import com.campus.trade.dto.AdminOrderCreateDTO;
 import com.campus.trade.dto.AdminOrderUpdateDTO;
 import com.campus.trade.dto.PageResult;
+import com.campus.trade.dto.ShipmentDTO;
 import com.campus.trade.entity.Order;
 import com.campus.trade.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,15 @@ public class AdminOrderController {
     @DeleteMapping("/{id}")
     public Result<Void> deleteOrder(@PathVariable String id) {
         orderService.deleteOrder(id);
+        return Result.success();
+    }
+
+    /**
+     * 发货操作
+     */
+    @PutMapping("/{id}/ship")
+    public Result<Void> shipOrder(@PathVariable String id, @RequestBody ShipmentDTO shipmentDTO) {
+        orderService.shipOrder(id, shipmentDTO);
         return Result.success();
     }
 }

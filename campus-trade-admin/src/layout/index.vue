@@ -23,6 +23,10 @@
           <el-icon><Location /></el-icon>
           <span>交易地点管理</span>
         </el-menu-item>
+        <el-menu-item index="/delivery-management">
+          <el-icon><Van /></el-icon>
+          <span>配送管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>
@@ -50,7 +54,7 @@
 <script setup>
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
-import { DataLine, User, Goods, Tickets, Location, ArrowDown } from '@element-plus/icons-vue';
+import { DataLine, User, Goods, Tickets, Location, Van, ArrowDown } from '@element-plus/icons-vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

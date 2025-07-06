@@ -43,6 +43,12 @@ const routes = [
         name: 'LocationManagement',
         component: () => import('../views/location/index.vue'),
         meta: { title: '交易地点管理', requiresAuth: true }
+      },
+      {
+        path: 'delivery-management',
+        name: 'DeliveryManagement',
+        component: () => import('../views/delivery/index.vue'),
+        meta: { title: '配送管理', requiresAuth: true }
       }
     ]
   }

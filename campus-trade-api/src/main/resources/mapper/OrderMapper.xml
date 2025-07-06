@@ -73,6 +73,10 @@
         SELECT COUNT(*) FROM orders
     </select>
 
+    <select id="countOrdersByStatus" resultType="long">
+        SELECT COUNT(*) FROM orders WHERE order_status = #{status}
+    </select>
+
     <update id="updateOrderByAdmin">
         UPDATE orders
         <set>

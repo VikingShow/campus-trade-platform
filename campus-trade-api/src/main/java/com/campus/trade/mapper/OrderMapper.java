@@ -17,6 +17,7 @@ public interface OrderMapper {
     List<Order> findAllForAdmin(@Param("orderId") String orderId, @Param("deliveryMethod") String deliveryMethod);
 
     long countTotalOrders();
+    long countOrdersByStatus(@Param("status") String status);
 
     void deleteById(String orderId);
 

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+//    @Caching
     @Cacheable("products")
     public List<Product> getProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String orderBy) {
         return productMapper.findProducts(keyword, categoryId, minPrice, maxPrice, orderBy);
@@ -216,6 +218,9 @@ public class ProductServiceImpl implements ProductService {
         product.setConditionLevel(adminProductDTO.getConditionLevel());
         product.setCoverImage(adminProductDTO.getCoverImage());
         product.setSellerId(adminProductDTO.getSellerId()); // 使用指定的卖家ID
+        if (adminProductDTO.getDeliveryOptions() != null) {
+            product.setDeliveryOptions(adminProductDTO.getDeliveryOptions());
+        }
 
         productMapper.insertProduct(product);
 

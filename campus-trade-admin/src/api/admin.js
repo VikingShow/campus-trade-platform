@@ -64,4 +64,18 @@ export const getDailyRegistrationStats = () => {
     return apiClient.get('/admin/stats/daily-registrations');
 };
 
+// --- Delivery Management ---
+export const shipOrderByAdmin = (orderId, data) => {
+    return apiClient.put(`/admin/orders/${orderId}/ship`, data);
+};
+export const getDeliveryStats = () => {
+    return apiClient.get('/admin/delivery/stats');
+};
+export const exportDeliveryOrders = (params) => {
+    return apiClient.get('/admin/delivery/export', { 
+        params, 
+        responseType: 'blob' 
+    });
+};
+
 

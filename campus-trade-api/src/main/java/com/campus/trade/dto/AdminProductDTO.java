@@ -13,6 +13,7 @@ public class AdminProductDTO {
     private Integer conditionLevel;
     private String coverImage;
     private List<String> imageUrls;
+    private String deliveryOptions;
 
     // Getters and Setters
     public String getSellerId() { return sellerId; }
@@ -31,4 +32,6 @@ public class AdminProductDTO {
     public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
+    public String getDeliveryOptions() { return deliveryOptions; }
+    public void setDeliveryOptions(String deliveryOptions) { this.deliveryOptions = deliveryOptions; }
 }

@@ -287,7 +287,8 @@ const handleSubmit = async () => {
           categoryId: form.categoryId,
           conditionLevel: form.conditionLevel,
           coverImage: imageUrls[0],
-          imageUrls: imageUrls.slice(1)
+          imageUrls: imageUrls.slice(1),
+          deliveryOptions: 'MEETUP' // 添加默认的配送方式
         };
 
         if (isEdit.value) {

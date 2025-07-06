@@ -25,10 +25,8 @@ public class FileStorageServiceImpl implements FileStorageService {
      */
     public FileStorageServiceImpl() {
         // 创建一个指向当前工作目录下的 "uploads" 文件夹的路径
-//        this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
-        // 【关键修正】将文件保存到 /var/www/campus-trade/uploads/ 目录下
-        // 这是一个Linux服务器上存放Web资源的规范位置
-        this.fileStorageLocation = Paths.get("/var/www/campus-trade/uploads").toAbsolutePath().normalize();
+        // 【修正】使用相对路径，与WebConfig中的静态资源映射保持一致
+        this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
         try {
             // 如果这个目录不存在，就创建它
             Files.createDirectories(this.fileStorageLocation);
