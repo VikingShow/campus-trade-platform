@@ -7,4 +7,7 @@ import java.util.List;
 public interface AdminDashboardService {
     AdminDashboardStatsDTO getSummaryStats();
     List<DailyStatsDTO> getDailyRegistrationStats();
+    List<DailyStatsDTO> getUserGrowthStats(int days);
+    List<DailyStatsDTO> getOrderTrendStats(int days);
+    List<DailyStatsDTO> getProductTrendStats(int days);
 }

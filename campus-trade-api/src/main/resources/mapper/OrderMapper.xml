@@ -91,6 +91,14 @@
         SELECT COUNT(*) FROM orders WHERE order_status = #{status}
     </select>
 
+    <select id="countOrderTrends" resultType="com.campus.trade.dto.DailyStatsDTO">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM orders
+        WHERE create_time >= CURDATE() - INTERVAL #{days} DAY
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
     <update id="updateOrderByAdmin">
         UPDATE orders
         <set>

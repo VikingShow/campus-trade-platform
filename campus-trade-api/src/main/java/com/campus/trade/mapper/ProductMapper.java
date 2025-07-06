@@ -1,5 +1,6 @@
 package com.campus.trade.mapper;
 
+import com.campus.trade.dto.DailyStatsDTO;
 import com.campus.trade.entity.Product;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -22,6 +23,7 @@ public interface ProductMapper {
     List<Product> findAllForAdmin(@Param("keyword") String keyword);
 
     long countTotalProducts();
+    List<DailyStatsDTO> countProductTrends(@Param("days") int days);
 
     // 【新增】基于协同过滤的商品推荐查询
     List<Product> findRecommendedProducts(@Param("productId") String productId, @Param("limit") int limit);

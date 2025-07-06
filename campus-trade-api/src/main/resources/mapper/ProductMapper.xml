@@ -134,8 +134,15 @@
         SELECT COUNT(*) FROM product
     </select>
 
+    <select id="countProductTrends" resultType="com.campus.trade.dto.DailyStatsDTO">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM product
+        WHERE create_time >= CURDATE() - INTERVAL #{days} DAY
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
     <!-- 【新增】推荐商品查询的SQL -->
-    <!-- 逻辑：1. 找到所有收藏了目标商品的用户。 2. 找到这些用户收藏过的所有其他商品。 3. 按被共同收藏的次数排序，选出最高频的几个。 -->
     <select id="findRecommendedProducts" resultMap="ProductWithSeller">
         SELECT
         <include refid="productColumns"/>,

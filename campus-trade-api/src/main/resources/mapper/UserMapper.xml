@@ -86,6 +86,14 @@
         ORDER BY date ASC
     </select>
 
+    <select id="countUserGrowth" resultType="com.campus.trade.dto.DailyStatsDTO">
+        SELECT DATE(create_time) as date, COUNT(*) as count
+        FROM user
+        WHERE create_time >= CURDATE() - INTERVAL #{days} DAY
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+
     <select id="findByEmail" resultType="com.campus.trade.entity.User">
         SELECT * FROM user WHERE email = #{email}
     </select>

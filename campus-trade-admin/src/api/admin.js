@@ -63,6 +63,15 @@ export const getSummaryStats = () => {
 export const getDailyRegistrationStats = () => {
     return apiClient.get('/admin/stats/daily-registrations');
 };
+export const getUserGrowthStats = (days = 15) => {
+    return apiClient.get('/admin/stats/user-growth', { params: { days } });
+};
+export const getOrderTrendStats = (days = 15) => {
+    return apiClient.get('/admin/stats/order-trends', { params: { days } });
+};
+export const getProductTrendStats = (days = 15) => {
+    return apiClient.get('/admin/stats/product-trends', { params: { days } });
+};
 
 // --- Delivery Management ---
 export const shipOrderByAdmin = (orderId, data) => {

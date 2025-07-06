@@ -35,4 +35,19 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public List<DailyStatsDTO> getDailyRegistrationStats() {
         return userMapper.countDailyRegistrations();
     }
+
+    @Override
+    public List<DailyStatsDTO> getUserGrowthStats(int days) {
+        return userMapper.countUserGrowth(days);
+    }
+
+    @Override
+    public List<DailyStatsDTO> getOrderTrendStats(int days) {
+        return orderMapper.countOrderTrends(days);
+    }
+
+    @Override
+    public List<DailyStatsDTO> getProductTrendStats(int days) {
+        return productMapper.countProductTrends(days);
+    }
 }

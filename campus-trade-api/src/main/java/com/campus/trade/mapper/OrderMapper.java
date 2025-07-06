@@ -1,5 +1,6 @@
 package com.campus.trade.mapper;
 
+import com.campus.trade.dto.DailyStatsDTO;
 import com.campus.trade.entity.Order;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -18,6 +19,7 @@ public interface OrderMapper {
 
     long countTotalOrders();
     long countOrdersByStatus(@Param("status") String status);
+    List<DailyStatsDTO> countOrderTrends(@Param("days") int days);
 
     void deleteById(String orderId);
 

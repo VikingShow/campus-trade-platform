@@ -24,6 +24,7 @@ public interface UserMapper {
 
     long countTotalUsers();
     List<DailyStatsDTO> countDailyRegistrations();
+    List<DailyStatsDTO> countUserGrowth(@Param("days") int days);
 
     void updateUserByAdmin(User user);
     void deleteById(String id);
