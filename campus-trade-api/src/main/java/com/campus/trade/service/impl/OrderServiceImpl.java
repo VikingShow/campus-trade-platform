@@ -288,16 +288,60 @@ public class OrderServiceImpl implements OrderService {
         notificationService.createNotification(order.getBuyerId(), "ORDER_SHIPPED", notificationContent, orderId);
     }
 
-    /**
+        /**
      * 导出配送订单数据
      */
     @Override
     public void exportDeliveryOrders(String orderId, String deliveryMethod, String orderStatus, HttpServletResponse response) throws IOException {
-        // 这里可以实现Excel导出功能，暂时返回空实现
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=delivery_orders.xlsx");
-        
-        // TODO: 实现Excel导出逻辑
-        response.getWriter().write("配送订单数据导出功能待实现");
+        try {
+            // 设置响应头
+            response.setContentType("text/csv; charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=delivery_orders.csv");
+            
+            // 获取订单数据
+            List<Order> orders = orderMapper.findAllForAdmin(orderId, deliveryMethod);
+            
+            // 如果指定了订单状态，进行过滤
+            if (orderStatus != null && !orderStatus.isEmpty()) {
+                orders = orders.stream()
+                    .filter(order -> orderStatus.equals(order.getOrderStatus()))
+                    .collect(java.util.stream.Collectors.toList());
+            }
+            
+            // 创建简单的CSV内容
+            StringBuilder csvContent = new StringBuilder();
+            csvContent.append("订单ID,商品标题,买家,卖家,配送方式,订单状态,订单金额\n");
+            
+            for (Order order : orders) {
+                csvContent.append(String.format("%s,%s,%s,%s,%s,%s,%.2f\n",
+                    order.getId(),
+                    order.getProductTitle() != null ? order.getProductTitle() : "",
+                    order.getBuyerNickname() != null ? order.getBuyerNickname() : "",
+                    order.getSellerNickname() != null ? order.getSellerNickname() : "",
+                    "SHIPPING".equals(order.getDeliveryMethod()) ? "快递配送" : "线下面交",
+                    formatOrderStatus(order.getOrderStatus()),
+                    order.getTotalPrice()
+                ));
+            }
+            
+            // 写入响应
+            response.getWriter().write(csvContent.toString());
+        } catch (Exception e) {
+            throw new CustomException("导出失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 格式化订单状态
+     */
+    private String formatOrderStatus(String status) {
+        switch (status) {
+            case "AWAITING_MEETUP": return "待交易";
+            case "AWAITING_SHIPMENT": return "待发货";
+            case "SHIPPED": return "已发货";
+            case "COMPLETED": return "已完成";
+            case "CANCELLED": return "已取消";
+            default: return status;
+        }
     }
 }

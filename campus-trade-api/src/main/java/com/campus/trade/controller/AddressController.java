@@ -19,24 +19,24 @@ public class AddressController {
 
     @PostMapping
     public Result<UserAddress> add(@RequestBody AddressDTO addressDTO, @AuthenticationPrincipal AuthenticatedUser user) {
-        return Result.success(addressService.addAddress(user.getUserId(), addressDTO));
+        return Result.success(addressService.addAddress(Long.valueOf(user.getUserId()), addressDTO));
     }
     @GetMapping
     public Result<List<UserAddress>> list(@AuthenticationPrincipal AuthenticatedUser user) {
-        return Result.success(addressService.getUserAddresses(user.getUserId()));
+        return Result.success(addressService.getUserAddresses(Long.valueOf(user.getUserId())));
     }
     @PutMapping("/{id}")
     public Result<UserAddress> update(@PathVariable String id, @RequestBody AddressDTO addressDTO, @AuthenticationPrincipal AuthenticatedUser user) {
-        return Result.success(addressService.updateAddress(id, user.getUserId(), addressDTO));
+        return Result.success(addressService.updateAddress(Long.valueOf(id), Long.valueOf(user.getUserId()), addressDTO));
     }
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable String id, @AuthenticationPrincipal AuthenticatedUser user) {
-        addressService.deleteAddress(id, user.getUserId());
+        addressService.deleteAddress(Long.valueOf(id), Long.valueOf(user.getUserId()));
         return Result.success();
     }
     @PostMapping("/{id}/set-default")
     public Result<Void> setDefault(@PathVariable String id, @AuthenticationPrincipal AuthenticatedUser user) {
-        addressService.setDefaultAddress(id, user.getUserId());
+        addressService.setDefaultAddress(Long.valueOf(id), Long.valueOf(user.getUserId()));
         return Result.success();
     }
 }

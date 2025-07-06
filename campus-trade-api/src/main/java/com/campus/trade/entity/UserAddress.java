@@ -5,8 +5,8 @@ import java.util.Date;
 
 public class UserAddress implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String id;
-    private String userId;
+    private Long id;
+    private Long userId;
     private String recipientName;
     private String phone;
     private String province;
@@ -17,10 +17,10 @@ public class UserAddress implements Serializable {
     private Date createTime;
 
     // --- Getters and Setters ---
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
     public String getRecipientName() { return recipientName; }
     public void setRecipientName(String recipientName) { this.recipientName = recipientName; }
     public String getPhone() { return phone; }

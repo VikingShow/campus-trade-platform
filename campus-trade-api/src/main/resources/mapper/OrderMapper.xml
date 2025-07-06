@@ -9,12 +9,21 @@
         <result property="sellerId" column="seller_id"/>
         <result property="orderStatus" column="order_status"/>
         <result property="totalPrice" column="total_price"/>
+        <result property="deliveryMethod" column="delivery_method"/>
+        <result property="meetupLocationId" column="meetup_location_id"/>
+        <result property="meetupTimeSlot" column="meetup_time_slot"/>
+        <result property="shippingAddressId" column="shipping_address_id"/>
+        <result property="shippingProvider" column="shipping_provider"/>
+        <result property="trackingNumber" column="tracking_number"/>
         <result property="createTime" column="create_time"/>
         <result property="productTitle" column="product_title"/>
         <result property="productImage" column="cover_image"/>
         <result property="buyerNickname" column="buyer_nickname"/>
         <result property="sellerNickname" column="seller_nickname"/>
         <result property="meetupLocationName" column="location_name"/>
+        <result property="recipientName" column="recipient_name"/>
+        <result property="phone" column="phone"/>
+        <result property="fullAddress" column="full_address"/>
     </resultMap>
 
     <sql id="orderJoins">
@@ -23,31 +32,35 @@
         JOIN `user` buyer ON o.buyer_id = buyer.id
         JOIN `user` seller ON o.seller_id = seller.id
         LEFT JOIN meetup_location ml ON o.meetup_location_id = ml.id
+        LEFT JOIN user_addresses ua ON o.shipping_address_id = ua.id
     </sql>
 
     <select id="findOrderById" resultMap="OrderWithDetails">
-        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, seller.nickname as seller_nickname, ml.name as location_name
+        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, seller.nickname as seller_nickname, ml.name as location_name,
+               ua.recipient_name, ua.phone, CONCAT(ua.province, ' ', ua.city, ' ', ua.district, ' ', ua.detailed_address) as full_address
         <include refid="orderJoins"/>
         WHERE o.id = #{orderId}
     </select>
 
     <select id="findOrdersByBuyerId" resultMap="OrderWithDetails">
-        SELECT o.*, p.title as product_title, p.cover_image, seller.nickname as seller_nickname, ml.name as location_name
+        SELECT o.*, p.title as product_title, p.cover_image, seller.nickname as seller_nickname, ml.name as location_name,
+               ua.recipient_name, ua.phone, CONCAT(ua.province, ' ', ua.city, ' ', ua.district, ' ', ua.detailed_address) as full_address
         <include refid="orderJoins"/>
         WHERE o.buyer_id = #{buyerId}
         ORDER BY o.create_time DESC
     </select>
 
     <select id="findOrdersBySellerId" resultMap="OrderWithDetails">
-        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, ml.name as location_name
+        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, ml.name as location_name,
+               ua.recipient_name, ua.phone, CONCAT(ua.province, ' ', ua.city, ' ', ua.district, ' ', ua.detailed_address) as full_address
         <include refid="orderJoins"/>
         WHERE o.seller_id = #{sellerId}
         ORDER BY o.create_time DESC
     </select>
 
     <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO orders(product_id, buyer_id, seller_id, order_status, total_price, delivery_method, meetup_location_id, meetup_time_slot)
-        VALUES(#{productId}, #{buyerId}, #{sellerId}, #{orderStatus}, #{totalPrice}, #{deliveryMethod}, #{meetupLocationId}, #{meetupTimeSlot})
+        INSERT INTO orders(product_id, buyer_id, seller_id, order_status, total_price, delivery_method, meetup_location_id, meetup_time_slot, shipping_address_id)
+        VALUES(#{productId}, #{buyerId}, #{sellerId}, #{orderStatus}, #{totalPrice}, #{deliveryMethod}, #{meetupLocationId}, #{meetupTimeSlot}, #{shippingAddressId})
     </insert>
 
     <update id="updateOrderStatus">
@@ -56,7 +69,8 @@
 
     <!-- 【新增】管理员查询所有订单的SQL -->
     <select id="findAllForAdmin" resultMap="OrderWithDetails">
-        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, seller.nickname as seller_nickname, ml.name as location_name
+        SELECT o.*, p.title as product_title, p.cover_image, buyer.nickname as buyer_nickname, seller.nickname as seller_nickname, ml.name as location_name,
+               ua.recipient_name, ua.phone, CONCAT(ua.province, ' ', ua.city, ' ', ua.district, ' ', ua.detailed_address) as full_address
         <include refid="orderJoins"/>
         <where>
             <if test="orderId != null and orderId != ''">

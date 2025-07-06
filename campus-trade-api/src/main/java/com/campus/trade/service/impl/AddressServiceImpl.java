@@ -20,7 +20,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public UserAddress addAddress(String userId, AddressDTO addressDTO) {
+    public UserAddress addAddress(Long userId, AddressDTO addressDTO) {
         // 如果新地址要设为默认，先将该用户的所有其他地址取消默认
         if (Boolean.TRUE.equals(addressDTO.getIsDefault())) {
             addressMapper.clearDefaultAddress(userId);
@@ -43,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public UserAddress updateAddress(String addressId, String userId, AddressDTO addressDTO) {
+    public UserAddress updateAddress(Long addressId, Long userId, AddressDTO addressDTO) {
         if (Boolean.TRUE.equals(addressDTO.getIsDefault())) {
             addressMapper.clearDefaultAddress(userId);
         }
@@ -64,18 +64,18 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public void deleteAddress(String addressId, String userId) {
+    public void deleteAddress(Long addressId, Long userId) {
         addressMapper.delete(addressId, userId);
     }
 
     @Override
-    public List<UserAddress> getUserAddresses(String userId) {
+    public List<UserAddress> getUserAddresses(Long userId) {
         return addressMapper.findByUserId(userId);
     }
 
     @Override
     @Transactional
-    public void setDefaultAddress(String addressId, String userId) {
+    public void setDefaultAddress(Long addressId, Long userId) {
         addressMapper.clearDefaultAddress(userId);
         addressMapper.setDefaultAddress(addressId, userId);
     }

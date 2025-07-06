@@ -17,7 +17,7 @@ public class Order implements Serializable {
     private Integer meetupLocationId;
     private String meetupTimeSlot;
     private Date createTime;
-    private String shippingAddressId;
+    private Long shippingAddressId;
     private String shippingProvider;
     private String trackingNumber;
     // Related fields
@@ -26,6 +26,10 @@ public class Order implements Serializable {
     private String buyerNickname;
     private String sellerNickname;
     private String meetupLocationName;
+    // 收货地址相关字段
+    private String recipientName;
+    private String phone;
+    private String fullAddress;
 
     // --- Getters and Setters ---
 
@@ -59,10 +63,16 @@ public class Order implements Serializable {
     public void setSellerNickname(String sellerNickname) { this.sellerNickname = sellerNickname; }
     public String getMeetupLocationName() { return meetupLocationName; }
     public void setMeetupLocationName(String meetupLocationName) { this.meetupLocationName = meetupLocationName; }
-    public String getShippingAddressId() { return shippingAddressId; }
-    public void setShippingAddressId(String shippingAddressId) { this.shippingAddressId = shippingAddressId; }
+    public Long getShippingAddressId() { return shippingAddressId; }
+    public void setShippingAddressId(Long shippingAddressId) { this.shippingAddressId = shippingAddressId; }
     public String getShippingProvider() { return shippingProvider; }
     public void setShippingProvider(String shippingProvider) { this.shippingProvider = shippingProvider; }
     public String getTrackingNumber() { return trackingNumber; }
     public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
+    public String getRecipientName() { return recipientName; }
+    public void setRecipientName(String recipientName) { this.recipientName = recipientName; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getFullAddress() { return fullAddress; }
+    public void setFullAddress(String fullAddress) { this.fullAddress = fullAddress; }
 }

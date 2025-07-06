@@ -9,8 +9,8 @@ import java.util.List;
 public interface AddressMapper {
     void insert(UserAddress address);
     void update(UserAddress address);
-    void delete(@Param("addressId") String addressId, @Param("userId") String userId);
-    List<UserAddress> findByUserId(String userId);
-    void clearDefaultAddress(String userId);
-    void setDefaultAddress(@Param("addressId") String addressId, @Param("userId") String userId);
+    void delete(@Param("addressId") Long addressId, @Param("userId") Long userId);
+    List<UserAddress> findByUserId(Long userId);
+    void clearDefaultAddress(Long userId);
+    void setDefaultAddress(@Param("addressId") Long addressId, @Param("userId") Long userId);
 }
