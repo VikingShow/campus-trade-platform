@@ -13,6 +13,7 @@
         <result property="conditionLevel" column="condition_level"/>
         <result property="coverImage" column="cover_image"/>
         <result property="status" column="p_status"/>
+        <result property="deliveryOptions" column="delivery_options"/>
         <result property="createTime" column="p_create_time"/>
         <result property="sellerNickname" column="nickname"/>
         <result property="sellerAvatar" column="avatar"/>
@@ -30,6 +31,7 @@
         <result property="conditionLevel" column="condition_level"/>
         <result property="coverImage" column="cover_image"/>
         <result property="status" column="p_status"/>
+        <result property="deliveryOptions" column="delivery_options"/>
         <result property="createTime" column="p_create_time"/>
         <result property="sellerNickname" column="nickname"/>
         <result property="sellerAvatar" column="avatar"/>
@@ -45,11 +47,12 @@
 
     <sql id="productColumns">
         p.id as p_id, p.seller_id, p.category_id, p.title, p.description, p.price,
-        p.condition_level, p.cover_image, p.status as p_status, p.create_time as p_create_time,
+        p.condition_level, p.cover_image, p.status as p_status,
+        p.delivery_options, p.create_time as p_create_time,
         u.nickname, u.avatar, u.credit_score
     </sql>
 
-    <!-- 【关键修正】查询商品详情时，LEFT JOIN product_images 表，以获取所有图片 -->
+    <!-- 【最终修正】移除了无效的  标签 -->
     <select id="findProductById" resultMap="ProductWithDetails">
         SELECT
         <include refid="productColumns"/>,
@@ -101,11 +104,13 @@
         ORDER BY p.create_time DESC
     </select>
 
+    <!-- 【修改】在 insertProduct 语句中加入 delivery_options 字段 -->
     <insert id="insertProduct" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO product(seller_id, category_id, title, description, price, condition_level, cover_image, status)
-        VALUES(#{sellerId}, #{categoryId}, #{title}, #{description}, #{price}, #{conditionLevel}, #{coverImage}, 'AVAILABLE')
+        INSERT INTO product(seller_id, category_id, title, description, price, condition_level, cover_image, status, delivery_options)
+        VALUES(#{sellerId}, #{categoryId}, #{title}, #{description}, #{price}, #{conditionLevel}, #{coverImage}, 'AVAILABLE', #{deliveryOptions})
     </insert>
 
+    <!-- 【修改】在 updateProduct 语句中加入 delivery_options 字段 -->
     <update id="updateProduct">
         UPDATE product SET
         category_id = #{categoryId},
@@ -113,6 +118,7 @@
         description = #{description},
         price = #{price},
         condition_level = #{conditionLevel},
+        delivery_options = #{deliveryOptions},
         <if test="coverImage != null and coverImage != ''">
             cover_image = #{coverImage},
         </if>
@@ -148,4 +154,8 @@
     <delete id="deleteById">
         DELETE FROM product WHERE id = #{productId}
     </delete>
+
+
+
+
 </mapper>

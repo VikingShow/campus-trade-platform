@@ -46,6 +46,12 @@
       <el-form-item label="新旧程度" prop="conditionLevel">
          <el-rate v-model="form.conditionLevel" :texts="['成色一般', '明显使用', '轻微使用', '几乎全新', '全新']" show-text />
       </el-form-item>
+      <el-form-item label="配送方式" prop="deliveryOptions">
+        <el-checkbox-group v-model="form.deliveryOptions">
+          <el-checkbox label="MEETUP">线下面交</el-checkbox>
+          <el-checkbox label="SHIPPING">支持快递</el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleSubmit" :loading="submitting">
           {{ isEdit ? '更新商品' : '确认发布' }}
@@ -80,8 +86,10 @@ const form = reactive({
   price: 0.01,
   categoryId: '',
   conditionLevel: 3,
-  fileList: [], 
+  fileList: [],
+  deliveryOptions: ['MEETUP'], // 默认选中线下面交
 });
+
 
 const dialogImageUrl = ref('');
 const dialogVisible = ref(false);
@@ -90,7 +98,8 @@ const rules = {
   title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
   price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
-  fileList: [{ type: 'array', required: true, message: '请至少上传一张图片', trigger: 'change' }]
+  fileList: [{ type: 'array', required: true, message: '请至少上传一张图片', trigger: 'change' }],
+  deliveryOptions: [{ type: 'array', required: true, message: '请至少选择一种配送方式', trigger: 'change' }]
 };
 
 const isEdit = computed(() => !!props.id);
@@ -140,8 +149,9 @@ const handleSubmit = async () => {
           price: form.price,
           categoryId: form.categoryId,
           conditionLevel: form.conditionLevel,
-          coverImage: imageUrls[0], 
-          imageUrls: imageUrls.slice(1)
+          coverImage: imageUrls[0],
+          imageUrls: imageUrls.slice(1),
+          deliveryOptions: form.deliveryOptions, // 【新增】提交配送方式
         };
 
         if (isEdit.value) {
@@ -166,13 +176,13 @@ const fetchProductData = async (id) => {
     try {
         const res = await getProductById(id);
         const productData = res.data.data;
-        
+        Object.assign(form, productData);
         form.title = productData.title;
         form.description = productData.description;
         form.price = productData.price;
         form.categoryId = productData.categoryId;
         form.conditionLevel = productData.conditionLevel;
-        
+        form.deliveryOptions = productData.deliveryOptions ? productData.deliveryOptions.split(',') : [];
         const images = [productData.coverImage, ...(productData.imageUrls || [])].filter(Boolean);
         form.fileList = images.map((url) => ({
             // 从 URL 中提取真实的文件名，如果失败则使用一个默认名

@@ -26,10 +26,12 @@ public class AdminOrderController {
 
     @GetMapping
     public Result<PageResult<Order>> getAllOrders(
+            // 【修改】增加 deliveryMethod 请求参数
             @RequestParam(required = false) String orderId,
+            @RequestParam(required = false) String deliveryMethod,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return Result.success(orderService.findAllOrdersForAdmin(orderId, page, size));
+        return Result.success(orderService.findAllOrdersForAdmin(orderId, deliveryMethod, page, size));
     }
 
     /**

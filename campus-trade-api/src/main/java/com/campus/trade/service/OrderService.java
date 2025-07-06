@@ -15,7 +15,7 @@ public interface OrderService {
     Order updateOrderStatus(String orderId, String userId, String status);
 
     // 【修改】为管理员查询所有订单的方法，增加分页参数
-    PageResult<Order> findAllOrdersForAdmin(String orderId, Integer page, Integer size);
+    PageResult<Order> findAllOrdersForAdmin(String orderId, String deliveryMethod, Integer page, Integer size);
 
     void updateOrderStatusByAdmin(String orderId, String status);
     void deleteOrder(String orderId);

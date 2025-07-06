@@ -45,15 +45,30 @@ public class OrderServiceImpl implements OrderService {
         if (!"AVAILABLE".equals(product.getStatus())) throw new CustomException("商品已售出或已下架");
         if (Objects.equals(product.getSellerId(), buyerId)) throw new CustomException("不能购买自己发布的商品");
 
+        // 【关键修改】校验用户选择的配送方式是否被卖家支持
+        String chosenMethod = createOrderDTO.getDeliveryMethod();
+        if (product.getDeliveryOptions() == null || !product.getDeliveryOptions().contains(chosenMethod)) {
+            throw new CustomException("该商品不支持您选择的配送方式");
+        }
         Order order = new Order();
         order.setProductId(product.getId());
         order.setBuyerId(buyerId);
         order.setSellerId(product.getSellerId());
-        order.setOrderStatus("AWAITING_MEETUP");
         order.setTotalPrice(product.getPrice());
-        order.setDeliveryMethod("ON_CAMPUS_MEETUP");
-        order.setMeetupLocationId(createOrderDTO.getMeetupLocationId());
-        order.setMeetupTimeSlot(createOrderDTO.getMeetupTimeSlot());
+        order.setDeliveryMethod(chosenMethod);
+
+        // 根据不同的配送方式，设置不同的初始状态和关联ID
+        if ("MEETUP".equals(chosenMethod)) {
+            if (createOrderDTO.getMeetupLocationId() == null) throw new CustomException("请选择交易地点");
+            order.setOrderStatus("AWAITING_MEETUP");
+            order.setMeetupLocationId(createOrderDTO.getMeetupLocationId());
+        } else if ("SHIPPING".equals(chosenMethod)) {
+            if (createOrderDTO.getShippingAddressId() == null) throw new CustomException("请选择收货地址");
+            order.setOrderStatus("AWAITING_SHIPMENT"); // 新状态：待发货
+            order.setShippingAddressId(createOrderDTO.getShippingAddressId());
+        } else {
+            throw new CustomException("无效的配送方式");
+        }
 
         orderMapper.insertOrder(order);
         productMapper.updateProductStatus(product.getId(), "SOLD");
@@ -107,10 +122,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageResult<Order> findAllOrdersForAdmin(String orderId, Integer page, Integer size) {
+    public PageResult<Order> findAllOrdersForAdmin(String orderId, String deliveryMethod, Integer page, Integer size) {
         PageHelper.startPage(page, size);
-        // 【最终修正】采用与 UserServiceImpl 完全一致的、更健壮的实现方式
-        List<Order> orderList = orderMapper.findAllForAdmin(orderId);
+        // 【修改】将 deliveryMethod 参数传递给 Mapper
+        List<Order> orderList = orderMapper.findAllForAdmin(orderId, deliveryMethod);
         return new PageResult<>(orderList);
     }
 
@@ -160,16 +175,17 @@ public class OrderServiceImpl implements OrderService {
 
         orderToUpdate.setOrderStatus(orderDTO.getOrderStatus());
         orderToUpdate.setTotalPrice(orderDTO.getTotalPrice());
+        orderToUpdate.setDeliveryMethod(orderDTO.getDeliveryMethod());
         orderToUpdate.setMeetupLocationId(orderDTO.getMeetupLocationId());
         orderToUpdate.setMeetupTimeSlot(orderDTO.getMeetupTimeSlot());
-
+        orderToUpdate.setShippingProvider(orderDTO.getShippingProvider());
+        orderToUpdate.setTrackingNumber(orderDTO.getTrackingNumber());
         orderMapper.updateOrderByAdmin(orderToUpdate);
         return orderMapper.findOrderById(orderId);
     }
 
     /**
-     * 【新增】为管理员创建订单的方法实现。
-     * 它会进行必要的校验，如商品是否存在、买家与卖家是否为同一人等。
+     * 【修改】为管理员创建订单的方法实现，增加对配送方式的处理。
      */
     @Override
     @Transactional
@@ -177,6 +193,9 @@ public class OrderServiceImpl implements OrderService {
     public Order createOrderByAdmin(AdminOrderCreateDTO orderDTO) {
         if (orderDTO.getProductId() == null || orderDTO.getBuyerId() == null) {
             throw new CustomException("必须同时选择商品和买家");
+        }
+        if (orderDTO.getDeliveryMethod() == null) {
+            throw new CustomException("必须选择配送方式");
         }
 
         Product product = productMapper.findProductById(orderDTO.getProductId());
@@ -194,11 +213,18 @@ public class OrderServiceImpl implements OrderService {
         order.setProductId(product.getId());
         order.setBuyerId(orderDTO.getBuyerId());
         order.setSellerId(product.getSellerId());
-        order.setOrderStatus("AWAITING_MEETUP");
         order.setTotalPrice(product.getPrice());
-        order.setDeliveryMethod("ON_CAMPUS_MEETUP");
-        order.setMeetupLocationId(orderDTO.getMeetupLocationId());
-        order.setMeetupTimeSlot(orderDTO.getMeetupTimeSlot());
+        order.setDeliveryMethod(orderDTO.getDeliveryMethod());
+
+        if ("MEETUP".equals(orderDTO.getDeliveryMethod())) {
+            order.setOrderStatus("AWAITING_MEETUP");
+            order.setMeetupLocationId(orderDTO.getMeetupLocationId());
+            order.setMeetupTimeSlot(orderDTO.getMeetupTimeSlot());
+        } else if ("SHIPPING".equals(orderDTO.getDeliveryMethod())) {
+            order.setOrderStatus("AWAITING_SHIPMENT");
+        } else {
+            throw new CustomException("无效的配送方式");
+        }
 
         orderMapper.insertOrder(order);
 

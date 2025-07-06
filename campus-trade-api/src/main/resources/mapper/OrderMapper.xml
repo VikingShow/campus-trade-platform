@@ -62,6 +62,9 @@
             <if test="orderId != null and orderId != ''">
                 o.id = #{orderId}
             </if>
+            <if test="deliveryMethod != null and deliveryMethod != ''">
+                AND o.delivery_method = #{deliveryMethod}
+            </if>
         </where>
         ORDER BY o.create_time DESC
     </select>
@@ -74,11 +77,16 @@
         UPDATE orders
         <set>
             <if test="orderStatus != null and orderStatus != ''"> order_status = #{orderStatus}, </if>
+            <if test="totalPrice != null"> total_price = #{totalPrice}, </if>
+            <if test="deliveryMethod != null and deliveryMethod != ''"> delivery_method = #{deliveryMethod}, </if>
             <if test="meetupLocationId != null"> meetup_location_id = #{meetupLocationId}, </if>
             <if test="meetupTimeSlot != null"> meetup_time_slot = #{meetupTimeSlot}, </if>
+            <if test="shippingProvider != null"> shipping_provider = #{shippingProvider}, </if>
+            <if test="trackingNumber != null"> tracking_number = #{trackingNumber}, </if>
         </set>
         WHERE id = #{id}
     </update>
+
 
     <delete id="deleteById">
         DELETE FROM orders WHERE id = #{orderId}

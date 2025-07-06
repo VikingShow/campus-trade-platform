@@ -165,3 +165,7 @@ ALTER TABLE `orders`
     ADD COLUMN `shipping_provider` VARCHAR(50) NULL COMMENT '快递公司' AFTER `shipping_address_id`,
     ADD COLUMN `tracking_number` VARCHAR(100) NULL COMMENT '快递单号' AFTER `shipping_provider`,
     ADD CONSTRAINT `fk_order_address` FOREIGN KEY (`shipping_address_id`) REFERENCES `user_addresses`(`id`) ON DELETE SET NULL;
+
+-- 为 product 表添加 delivery_options 字段
+ALTER TABLE `product`
+    ADD COLUMN `delivery_options` VARCHAR(100) NOT NULL DEFAULT 'MEETUP' COMMENT '支持的配送方式 (MEETUP,SHIPPING)' AFTER `status`;

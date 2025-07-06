@@ -15,3 +15,7 @@ export const updateOrderStatus = (orderId, status) => {
 export const createOrder = (data) => {
     return apiClient.post('/orders', data);
 };
+
+export const shipOrder = (orderId, data) => {
+    return apiClient.post(`/api/orders/${orderId}/ship`, data);
+};

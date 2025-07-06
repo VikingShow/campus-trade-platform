@@ -17,7 +17,9 @@ public class Order implements Serializable {
     private Integer meetupLocationId;
     private String meetupTimeSlot;
     private Date createTime;
-
+    private String shippingAddressId;
+    private String shippingProvider;
+    private String trackingNumber;
     // Related fields
     private String productTitle;
     private String productImage;
@@ -57,4 +59,10 @@ public class Order implements Serializable {
     public void setSellerNickname(String sellerNickname) { this.sellerNickname = sellerNickname; }
     public String getMeetupLocationName() { return meetupLocationName; }
     public void setMeetupLocationName(String meetupLocationName) { this.meetupLocationName = meetupLocationName; }
+    public String getShippingAddressId() { return shippingAddressId; }
+    public void setShippingAddressId(String shippingAddressId) { this.shippingAddressId = shippingAddressId; }
+    public String getShippingProvider() { return shippingProvider; }
+    public void setShippingProvider(String shippingProvider) { this.shippingProvider = shippingProvider; }
+    public String getTrackingNumber() { return trackingNumber; }
+    public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
 }

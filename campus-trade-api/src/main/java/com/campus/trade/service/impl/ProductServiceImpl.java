@@ -62,11 +62,16 @@ public class ProductServiceImpl implements ProductService {
         return product;
     }
 
+    /**
+     * 【最终修正】
+     * 使用 @CacheEvict 注解，在创建新商品后，同时清除 "products" (列表) 和 "product" (详情) 这两个缓存。
+     * allEntries = true 表示将这两个缓存中的所有条目全部清除。
+     */
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @CacheEvict(cacheNames = {"products", "product"}, allEntries = true)
     public Product createProduct(ProductDTO productDTO, String sellerId) {
-        log.info(">>> [新增商品] 清除 'products' 缓存。");
+        log.info(">>> [新增商品] 清除 'products' 和 'product' 缓存。");
         Product product = new Product();
         product.setTitle(productDTO.getTitle());
         product.setDescription(productDTO.getDescription());
@@ -74,6 +79,9 @@ public class ProductServiceImpl implements ProductService {
         product.setCategoryId(productDTO.getCategoryId());
         product.setConditionLevel(productDTO.getConditionLevel());
         product.setCoverImage(productDTO.getCoverImage());
+        if (productDTO.getDeliveryOptions() != null) {
+            product.setDeliveryOptions(String.join(",", productDTO.getDeliveryOptions()));
+        }
         product.setSellerId(sellerId);
 
         productMapper.insertProduct(product);
@@ -85,6 +93,7 @@ public class ProductServiceImpl implements ProductService {
 
         return productMapper.findProductById(product.getId());
     }
+
 
     @Override
     @Transactional

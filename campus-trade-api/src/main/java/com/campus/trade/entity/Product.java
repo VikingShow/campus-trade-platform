@@ -17,8 +17,11 @@ public class Product implements Serializable {
     private Integer conditionLevel;
     private String coverImage;
     private String status;
+    private String deliveryOptions; // 确保此字段存在
     private Date createTime;
     private Date updateTime;
+
+    // 关联查询字段
     private String categoryName;
     private String sellerNickname;
     private String sellerAvatar;
@@ -44,6 +47,8 @@ public class Product implements Serializable {
     public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getDeliveryOptions() { return deliveryOptions; }
+    public void setDeliveryOptions(String deliveryOptions) { this.deliveryOptions = deliveryOptions; }
     public Date getCreateTime() { return createTime; }
     public void setCreateTime(Date createTime) { this.createTime = createTime; }
     public Date getUpdateTime() { return updateTime; }

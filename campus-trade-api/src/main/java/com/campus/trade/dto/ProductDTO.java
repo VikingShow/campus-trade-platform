@@ -12,6 +12,7 @@ public class ProductDTO {
     private Integer conditionLevel;
     private String coverImage; // 主图
     private List<String> imageUrls; // 其他附图列表
+    private List<String> deliveryOptions;
 
     // Getters and Setters
     public String getTitle() { return title; }
@@ -28,4 +29,6 @@ public class ProductDTO {
     public void setCoverImage(String coverImage) { this.coverImage = coverImage; }
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
+    public List<String> getDeliveryOptions() { return deliveryOptions; }
+    public void setDeliveryOptions(List<String> deliveryOptions) { this.deliveryOptions = deliveryOptions; }
 }
