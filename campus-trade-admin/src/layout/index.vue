@@ -65,11 +65,101 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-.admin-layout { height: 100vh; }
-.sidebar { background-color: #304156; }
-.logo { height: 60px; line-height: 60px; text-align: center; font-size: 20px; color: #fff; font-weight: bold; }
-.el-menu { border-right: none; }
-.header { display: flex; justify-content: flex-end; align-items: center; border-bottom: 1px solid #dcdfe6; }
-.el-dropdown-link { cursor: pointer; color: var(--el-color-primary); display: flex; align-items: center; }
-.content { padding: 20px; background-color: #f0f2f5; }
+.admin-layout {
+  height: 100vh;
+  background: linear-gradient(120deg, #f5f6fa 0%, #e9ebf0 100%);
+}
+.sidebar {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  margin: 18px 0 18px 18px;
+  box-shadow: 0 8px 32px 0 rgba(60,60,60,0.10);
+  padding-top: 12px;
+  min-height: calc(100vh - 36px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.logo {
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  font-size: 22px;
+  color: #007aff;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  font-family: 'San Francisco', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', Arial, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+.el-menu {
+  border-right: none;
+  background: transparent;
+  width: 100%;
+}
+.el-menu-item {
+  border-radius: 14px !important;
+  margin: 6px 12px;
+  transition: background 0.2s, color 0.2s;
+  font-size: 16px;
+  font-weight: 500;
+}
+.el-menu-item.is-active {
+  background: linear-gradient(90deg, #e0e5ec 0%, #f5f6fa 100%);
+  color: #007aff !important;
+  box-shadow: 0 2px 8px 0 rgba(0,122,255,0.08);
+}
+.el-menu-item:hover {
+  background: #e5e9f2;
+  color: #007aff;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-bottom: none;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 0 0 24px 24px;
+  margin: 18px 18px 0 0;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.08);
+  min-height: 64px;
+  padding: 0 32px;
+}
+.el-dropdown-link {
+  cursor: pointer;
+  color: #222;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 16px;
+  transition: background 0.2s, color 0.2s;
+}
+.el-dropdown-link:hover {
+  background: #e5e9f2;
+  color: #007aff;
+}
+.content {
+  padding: 36px 36px 24px 36px;
+  background: transparent;
+  min-height: 600px;
+}
+@media (max-width: 900px) {
+  .sidebar {
+    margin: 0;
+    border-radius: 0 0 24px 24px;
+    min-height: auto;
+  }
+  .header {
+    margin: 0;
+    border-radius: 0;
+    padding: 0 10px;
+  }
+  .content {
+    padding: 12px 4px;
+  }
+}
 </style>

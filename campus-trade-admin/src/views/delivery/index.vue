@@ -157,9 +157,9 @@
       </el-table-column>
       <el-table-column label="状态" width="100">
         <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.orderStatus)" size="small">
+          <span class="status-tag" :class="getStatusType(scope.row.orderStatus)">
             {{ formatStatus(scope.row.orderStatus) }}
-          </el-tag>
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150" align="center">
@@ -281,18 +281,18 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="订单ID">{{ currentOrder.id }}</el-descriptions-item>
           <el-descriptions-item label="订单状态">
-            <el-tag :type="getStatusType(currentOrder.orderStatus)">
+            <span class="status-tag" :class="getStatusType(currentOrder.orderStatus)">
               {{ formatStatus(currentOrder.orderStatus) }}
-            </el-tag>
+            </span>
           </el-descriptions-item>
           <el-descriptions-item label="商品标题">{{ currentOrder.productTitle }}</el-descriptions-item>
           <el-descriptions-item label="订单金额">¥{{ currentOrder.totalPrice }}</el-descriptions-item>
           <el-descriptions-item label="买家">{{ currentOrder.buyerNickname }}</el-descriptions-item>
           <el-descriptions-item label="卖家">{{ currentOrder.sellerNickname }}</el-descriptions-item>
           <el-descriptions-item label="配送方式">
-            <el-tag :type="currentOrder.deliveryMethod === 'SHIPPING' ? 'success' : 'primary'">
+            <span class="status-tag" :class="currentOrder.deliveryMethod === 'SHIPPING' ? 'success' : 'primary'">
               {{ currentOrder.deliveryMethod === 'SHIPPING' ? '快递配送' : '线下面交' }}
-            </el-tag>
+            </span>
           </el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ formatDate(currentOrder.createTime) }}</el-descriptions-item>
         </el-descriptions>
@@ -668,5 +668,32 @@ onMounted(() => {
 
 :deep(.el-descriptions) {
   margin-bottom: 16px;
+}
+
+.status-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-tag.primary {
+  background-color: #e6f5ff;
+  color: #1890ff;
+}
+
+.status-tag.success {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.status-tag.warning {
+  background-color: #fffbe6;
+  color: #faad14;
+}
+
+.status-tag.info {
+  background-color: #f9f0ff;
+  color: #9254de;
 }
 </style>

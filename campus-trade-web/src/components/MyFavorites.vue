@@ -15,7 +15,7 @@
                         </div>
                     </div>
                     <div class="unfavorite-btn">
-                        <el-button type="danger" plain size="small" @click="handleRemoveFavorite(product.id)">取消收藏</el-button>
+                        <el-button plain size="small" @click="handleRemoveFavorite(product.id)" :style="'background:#ff3b30!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">取消收藏</el-button>
                     </div>
                 </el-card>
             </el-col>
@@ -73,7 +73,7 @@ const onImageError = (e) => {
 onMounted(fetchFavorites);
 </script>
 
-<style scoped>
+<style>
 .product-card { cursor: pointer; position: relative; }
 .product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 4px; }
 .product-info { padding: 14px; }

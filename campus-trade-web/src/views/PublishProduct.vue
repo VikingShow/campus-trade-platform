@@ -53,7 +53,7 @@
         </el-checkbox-group>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">
+        <el-button @click="handleSubmit" :loading="submitting" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">
           {{ isEdit ? '更新商品' : '确认发布' }}
         </el-button>
       </el-form-item>

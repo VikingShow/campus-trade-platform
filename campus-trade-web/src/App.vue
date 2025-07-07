@@ -29,6 +29,13 @@
         <div v-else>
            <el-button @click="$router.push('/login')">登录/注册</el-button>
         </div>
+        <el-button class="btn-info" @click="toggleTheme">
+          <el-icon style="margin-right:4px;">
+            <Sunny v-if="theme==='light'" />
+            <Moon v-else />
+          </el-icon>
+          {{ theme==='dark' ? '白天模式' : '夜间模式' }}
+        </el-button>
       </div>
     </el-header>
     <el-main class="main-content">
@@ -41,31 +48,44 @@
 import { useAuthStore } from './stores/authStore';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { UserFilled, SwitchFilled } from '@element-plus/icons-vue';
-import { onMounted } from 'vue'; // 【新增】导入 onMounted
-
+import { UserFilled, SwitchFilled, Moon, Sunny } from '@element-plus/icons-vue';
+import { onMounted, ref } from 'vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
+
+const theme = ref('light');
+
+const setTheme = (val) => {
+  theme.value = val;
+  document.documentElement.setAttribute('data-theme', val);
+  localStorage.setItem('theme', val);
+};
+const toggleTheme = () => {
+  setTheme(theme.value === 'dark' ? 'light' : 'dark');
+};
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+      authStore.fetchFavoriteIds();
+  }
+  // 读取主题
+  const saved = localStorage.getItem('theme');
+  setTheme(saved === 'dark' ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme.value);
+});
 
 const handleLogout = () => {
     authStore.logout();
     ElMessage.success('已成功退出登录');
     router.push('/login');
 };
-
-onMounted(() => {
-    if (authStore.isAuthenticated) {
-        authStore.fetchFavoriteIds();
-    }
-});
 </script>
 
 <style>
 body {
   margin: 0;
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
-  background-color: #f4f4f5;
+  /* background-color: #f4f4f5; */
 }
 .main-layout {
   min-height: 100vh;
@@ -74,8 +94,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e6e6e6;
-  background-color: #fff;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-card);
   padding: 0 20px;
   position: sticky;
   top: 0;
@@ -101,6 +121,11 @@ body {
 }
 .el-menu-item {
     font-size: 16px;
+}
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 .user-area .el-dropdown {
     cursor: pointer;

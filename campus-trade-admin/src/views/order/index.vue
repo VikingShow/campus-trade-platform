@@ -1,7 +1,7 @@
 <template>
   <div class="order-management">
     <div class="toolbar">
-      <h2>订单管理</h2>
+      <h2 class="page-title">订单管理</h2>
       <div class="actions">
         <el-input
           v-model="filters.orderId"
@@ -49,16 +49,16 @@
       <el-table-column prop="sellerNickname" label="卖家" />
       <el-table-column label="配送方式" width="120">
         <template #default="scope">
-            <el-tag :type="scope.row.deliveryMethod === 'SHIPPING' ? 'success' : 'primary'" effect="light">
+            <span :class="['status-tag', scope.row.deliveryMethod === 'SHIPPING' ? 'status-success' : 'status-info']">
                 {{ scope.row.deliveryMethod === 'SHIPPING' ? '快递配送' : '线下面交' }}
-            </el-tag>
+            </span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="120">
         <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.orderStatus)">
+          <span :class="['status-tag', getStatusType(scope.row.orderStatus) === 'success' ? 'status-success' : (getStatusType(scope.row.orderStatus) === 'danger' ? 'status-danger' : (getStatusType(scope.row.orderStatus) === 'warning' ? 'status-warning' : 'status-info'))]">
             {{ formatStatus(scope.row.orderStatus) }}
-          </el-tag>
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="180" align="center">
@@ -318,9 +318,22 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.actions { display: flex; align-items: center; }
+<style>
+.order-management {
+  padding: 18px 0.5vw 0 0.5vw;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .pagination-container { display: flex; justify-content: center; margin-top: 20px; }
 .order-details { padding: 10px 20px; background-color: #fafafa; }
 .order-details p { margin: 5px 0; }

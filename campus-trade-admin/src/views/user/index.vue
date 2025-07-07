@@ -34,30 +34,30 @@
       <el-table-column prop="creditScore" label="信誉分" width="100" align="center" sortable />
       <el-table-column label="状态">
         <template #default="scope">
-          <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
+          <span :class="['status-tag', scope.row.status === 1 ? 'status-success' : 'status-danger']">
             {{ scope.row.status === 1 ? '正常' : '禁用' }}
-          </el-tag>
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="200" align="center">
         <template #default="scope">
-          <el-button size="small" @click="openDialog(scope.row)">编辑</el-button>
-          <el-switch
-            v-model="scope.row.status"
-            :active-value="1"
-            :inactive-value="0"
-            @change="handleStatusChange(scope.row)"
-            :disabled="scope.row.id === authStore.user?.id"
-            style="margin: 0 10px;"
-          />
-          <el-button 
-            size="small" 
-            type="danger" 
-            @click="handleDelete(scope.row)"
-            :disabled="scope.row.id === authStore.user?.id"
-          >
-            删除
-          </el-button>
+          <div class="action-btn-group">
+            <el-button size="small" class="btn-primary" @click="openDialog(scope.row)">编辑</el-button>
+            <el-switch
+              v-model="scope.row.status"
+              :active-value="1"
+              :inactive-value="0"
+              @change="handleStatusChange(scope.row)"
+              :disabled="scope.row.id === authStore.user?.id"
+              style="margin: 0 10px;"
+            />
+            <el-button 
+              size="small" 
+              class="btn-danger" 
+              @click="handleDelete(scope.row)"
+              :disabled="scope.row.id === authStore.user?.id"
+            >删除</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -256,19 +256,146 @@ onMounted(fetchUsers);
 </script>
 
 <style scoped>
+.user-management {
+  padding: 18px 0.5vw 0 0.5vw;
+}
 .toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+.toolbar h2 {
+  font-size: 2em;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+  letter-spacing: 1px;
 }
 .actions {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+.el-input {
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 4px 0 rgba(60,60,60,0.04);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.el-input__inner {
+  border-radius: 14px;
+  font-size: 15px;
+  padding: 8px 14px;
+}
+.el-select {
+  border-radius: 12px;
+}
+.el-button {
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 8px 22px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.el-table {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  background: #fff;
+  margin-bottom: 18px;
+}
+.el-table th {
+  background: #f5f6fa !important;
+  color: #222;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1.5px solid #e0e5ec;
+}
+.el-table td {
+  font-size: 15px;
+  color: #222;
+  border-bottom: 1px solid #e0e5ec;
+}
+.el-table__row:hover td {
+  background: #e5e9f2 !important;
+  color: #007aff;
+}
+.el-table__body tr.current-row > td {
+  border-left: 4px solid #007aff;
+  background: #f0f8ff !important;
 }
 .pagination-container {
   display: flex;
+  justify-content: flex-end;
+  margin: 18px 0 0 0;
+}
+.el-pagination {
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 8px 0 rgba(60,60,60,0.06);
+  padding: 6px 18px;
+}
+.action-btn-group {
+  display: flex;
+  gap: 14px;
   justify-content: center;
-  margin-top: 20px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.action-btn-group .el-button {
+  min-width: 60px;
+  height: 40px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+.el-dialog {
+  border-radius: 22px !important;
+  box-shadow: 0 8px 32px 0 rgba(60,60,60,0.12);
+  background: #fff;
+}
+.el-dialog__header {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #222;
+  padding-bottom: 8px;
+}
+.el-form {
+  padding: 8px 0 0 0;
+}
+.el-form-item {
+  margin-bottom: 18px;
+}
+.el-form-item__label {
+  font-weight: 600;
+  color: #222;
+  font-size: 15px;
+}
+.el-input-number {
+  border-radius: 12px;
+}
+@media (max-width: 900px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .action-btn-group {
+    gap: 8px;
+  }
+  .action-btn-group .el-button {
+    min-width: 48px;
+    height: 34px;
+    font-size: 14px;
+    padding: 0 10px;
+  }
 }
 </style>

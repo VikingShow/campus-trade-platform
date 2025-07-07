@@ -16,14 +16,14 @@
       <el-table-column prop="sellerNickname" label="卖家" width="150" />
       <el-table-column prop="orderStatus" label="订单状态" width="150">
         <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.orderStatus)">{{ formatStatus(scope.row.orderStatus) }}</el-tag>
+          <span class="status-tag" :class="'status-' + getStatusType(scope.row.orderStatus)">{{ formatStatus(scope.row.orderStatus) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150" align="center">
        <template #default="scope">
           <!-- 【新增】评价按钮 -->
-          <el-button size="small" type="primary" @click="openRatingDialog(scope.row)" v-if="scope.row.orderStatus === 'COMPLETED'">评价</el-button>
-          <el-button size="small" type="danger" @click="handleCancel(scope.row)" v-if="scope.row.orderStatus === 'AWAITING_MEETUP'">取消订单</el-button>
+          <el-button size="small" @click="openRatingDialog(scope.row)" v-if="scope.row.orderStatus === 'COMPLETED'" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">评价</el-button>
+          <el-button size="small" @click="handleCancel(scope.row)" v-if="scope.row.orderStatus === 'AWAITING_MEETUP'" :style="'background:#ff3b30!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">取消订单</el-button>
           <span v-if="scope.row.orderStatus !== 'COMPLETED' && scope.row.orderStatus !== 'AWAITING_MEETUP'">--</span>
         </template>
       </el-table-column>

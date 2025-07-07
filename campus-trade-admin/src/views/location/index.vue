@@ -1,7 +1,7 @@
 <template>
   <div class="location-management">
-    <h2>交易地点管理</h2>
     <div class="toolbar">
+      <h2 class="page-title">交易地点管理</h2>
       <el-button type="primary" :icon="Plus" @click="openDialog(null)">新增地点</el-button>
     </div>
 
@@ -11,8 +11,10 @@
       <el-table-column prop="description" label="描述" />
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
-          <el-button size="small" @click="openDialog(scope.row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+          <div class="action-btn-group">
+            <el-button size="small" class="btn-primary" @click="openDialog(scope.row)">编辑</el-button>
+            <el-button size="small" class="btn-danger" @click="handleDelete(scope.row)">删除</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -130,8 +132,107 @@ const handleDelete = (row) => {
 onMounted(fetchLocations);
 </script>
 
-<style scoped>
+<style>
+.location-management {
+  padding: 18px 0.5vw 0 0.5vw;
+}
 .toolbar {
-  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+.el-button {
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 8px 22px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.el-table {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  background: #fff;
+  margin-bottom: 18px;
+}
+.el-table th {
+  background: #f5f6fa !important;
+  color: #222;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1.5px solid #e0e5ec;
+}
+.el-table td {
+  font-size: 15px;
+  color: #222;
+  border-bottom: 1px solid #e0e5ec;
+}
+.el-table__row:hover td {
+  background: #e5e9f2 !important;
+  color: #007aff;
+}
+.el-table__body tr.current-row > td {
+  border-left: 4px solid #007aff;
+  background: #f0f8ff !important;
+}
+.action-btn-group {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.action-btn-group .el-button {
+  min-width: 60px;
+  height: 40px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+.el-dialog {
+  border-radius: 22px !important;
+  box-shadow: 0 8px 32px 0 rgba(60,60,60,0.12);
+  background: #fff;
+}
+.el-dialog__header {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #222;
+  padding-bottom: 8px;
+}
+.el-form {
+  padding: 8px 0 0 0;
+}
+.el-form-item {
+  margin-bottom: 18px;
+}
+.el-form-item__label {
+  font-weight: 600;
+  color: #222;
+  font-size: 15px;
+}
+@media (max-width: 900px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .action-btn-group {
+    gap: 8px;
+  }
+  .action-btn-group .el-button {
+    min-width: 48px;
+    height: 34px;
+    font-size: 14px;
+    padding: 0 10px;
+  }
 }
 </style>

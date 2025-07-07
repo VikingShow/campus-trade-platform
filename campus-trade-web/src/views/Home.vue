@@ -1,6 +1,7 @@
 <template>
   <el-container>
     <el-main>
+      <h2 class="page-title">发现好物</h2>
       <!-- 筛选与排序工具栏 -->
       <el-card class="filter-card" shadow="never">
         <el-row :gutter="20" align="middle">
@@ -48,7 +49,7 @@
       <!-- 商品列表 -->
       <el-row :gutter="20" v-loading="loading" style="margin-top: 20px;">
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in products" :key="product.id" style="margin-bottom: 20px;">
-          <el-card shadow="hover" class="product-card" @click="goToDetail(product.id)">
+          <el-card shadow="hover" class="product-card home-recommend-card" @click="goToDetail(product.id)">
             <div class="image-container">
                 <img :src="product.coverImage" class="product-image" alt="商品图片" @error="onImageError"/>
                 <!-- 【新增】如果商品有多张图片，显示一个角标 -->
@@ -60,14 +61,18 @@
              <div class="product-info">
                <p class="product-title">{{ product.title }}</p>
                <div class="bottom">
-                 <span class="product-price">¥{{ product.price }}</span>
-                 <span class="seller-info">{{ product.sellerNickname }}</span>
+                 <span class="status-tag status-danger price-tag">¥{{ product.price }}</span>
+                 <span class="status-tag status-info">{{ product.sellerNickname }}</span>
                </div>
              </div>
           </el-card>
         </el-col>
       </el-row>
-      <el-empty v-if="!loading && products.length === 0" description="暂时没有符合条件的商品" />
+      <el-empty v-if="!loading && products.length === 0" description="暂时没有符合条件的商品">
+        <template #image>
+          <el-icon style="font-size:48px;color:var(--color-primary)"><Goods /></el-icon>
+        </template>
+      </el-empty>
     </el-main>
   </el-container>
 </template>
@@ -75,7 +80,7 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { Search, CameraFilled } from '@element-plus/icons-vue'; // 【新增】导入相机图标
+import { Search, CameraFilled, Goods } from '@element-plus/icons-vue';
 import { getProducts } from '../api/product';
 import apiClient from '../api/axios.config';
 import { debounce } from '../utils/debounce';
@@ -92,12 +97,6 @@ const filters = reactive({
   maxPrice: undefined,
   orderBy: 'latest',
 });
-
-// const backendUrl = 'http://localhost:8080';
-// const fullImageUrl = (relativePath) => {
-//     if (!relativePath) return '';
-//     return `${backendUrl}${relativePath}`;
-// };
 
 const fetchProducts = async () => {
     loading.value = true;
@@ -132,7 +131,6 @@ const fetchProducts = async () => {
     }
 };
 
-// 【最终修正】补全 fetchCategories 函数的完整逻辑
 const fetchCategories = async () => {
     try {
         const response = await apiClient.get('/categories');
@@ -155,9 +153,12 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 .filter-card {
     margin-bottom: 20px;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+    background: #fff;
 }
 .price-range {
     display: flex;
@@ -167,13 +168,22 @@ onMounted(() => {
     margin: 0 10px;
     color: #909399;
 }
-.product-card { cursor: pointer; }
+.product-card {
+    cursor: pointer;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+    background: #fff;
+    transition: box-shadow 0.2s;
+}
+.product-card:hover {
+    box-shadow: 0 8px 32px 0 rgba(0,122,255,0.12);
+}
 .image-container {
     position: relative;
     width: 100%;
     height: 200px;
 }
-.product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 4px; }
+.product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 12px; }
 .image-count-overlay {
     position: absolute;
     bottom: 8px;
@@ -191,7 +201,26 @@ onMounted(() => {
 }
 .product-info { padding: 14px; }
 .product-title { font-size: 16px; color: #303133; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 8px 0; }
-.bottom { display: flex; justify-content: space-between; align-items: center; }
-.product-price { font-size: 18px; color: #F56C6C; font-weight: bold; }
-.seller-info { font-size: 13px; color: #909399; }
+.bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.home-recommend-card {
+  border: 2px solid transparent;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.home-recommend-card:hover {
+  border-image: linear-gradient(90deg, #6a93ff 0%, #a685ff 100%) 1;
+  box-shadow: 0 8px 32px 0 rgba(106,147,255,0.18);
+}
+/* 让首页价格更突出，防止被覆盖 */
+.price-tag {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  color: var(--color-tag-danger-text) !important;
+  color: #ff3b30 !important;
+  background: transparent !important;
+  box-shadow: none;
+  letter-spacing: 1px;
+  vertical-align: bottom;
+  margin-top: 6px;
+  display: inline-block;
+}
 </style>

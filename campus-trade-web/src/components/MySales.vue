@@ -16,12 +16,12 @@
       <el-table-column prop="buyerNickname" label="买家" width="150" />
       <el-table-column prop="orderStatus" label="订单状态" width="150">
         <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.orderStatus)">{{ formatStatus(scope.row.orderStatus) }}</el-tag>
+          <span class="status-tag" :class="'status-' + getStatusType(scope.row.orderStatus)">{{ formatStatus(scope.row.orderStatus) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150" align="center">
         <template #default="scope">
-          <el-button size="small" type="primary" @click="handleComplete(scope.row)" v-if="scope.row.orderStatus === 'AWAITING_MEETUP'">确认完成</el-button>
+          <el-button size="small" @click="handleComplete(scope.row)" v-if="scope.row.orderStatus === 'AWAITING_MEETUP'" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">确认完成</el-button>
           <span v-else>--</span>
         </template>
       </el-table-column>

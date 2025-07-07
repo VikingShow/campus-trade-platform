@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h2 class="page-title">商品详情</h2>
     <el-skeleton :loading="loading" animated>
       <!-- 加载时的骨架屏效果 -->
       <template #template>
@@ -49,10 +50,10 @@
 
             </el-col>
             <el-col :md="12">
-              <h1>{{ product.title }}</h1>
+              <h1 style="font-size:1.5em;font-weight:600;margin-bottom:10px;">{{ product.title }}</h1>
               <p class="description">{{ product.description }}</p>
               <div class="price-line">
-                <span class="price">¥ {{ product.price }}</span>
+                <span class="status-tag status-danger" style="font-size:1.2em;">¥ {{ product.price }}</span>
               </div>
               <el-descriptions :column="1" border style="margin-top:20px;">
                 <el-descriptions-item label="新旧程度">
@@ -63,32 +64,35 @@
                   <div class="seller-box">
                     <el-avatar :src="product.sellerAvatar" icon="UserFilled" />
                     <router-link :to="`/user/${product.sellerId}`" class="seller-link">
-                        <span class="seller-name">{{ product.sellerNickname }}</span>
+                        <span class="status-tag status-info seller-name">{{ product.sellerNickname }}</span>
                     </router-link>
-                    <el-tag effect="plain" round class="credit-score-tag" v-if="product.creditScore !== null">
-                      <el-icon><Finished/></el-icon>
-                      信誉分: {{ product.creditScore }}
-                    </el-tag>
+                    <transition name="fade-bounce">
+                      <span v-if="product.creditScore !== null" class="credit-badge">
+                        <el-icon><Finished/></el-icon>
+                        信誉分: {{ product.creditScore }}
+                      </span>
+                    </transition>
                   </div>
                 </el-descriptions-item>
               </el-descriptions>
               
               <div class="action-buttons">
-                <div v-if="isOwner">
-                  <el-button type="primary" :icon="Edit" @click="editProduct">编辑商品</el-button>
-                  <el-button type="danger" :icon="Delete" @click="delistProduct">下架商品</el-button>
+                <div v-if="isOwner" class="action-btn-group">
+                  <el-button class="btn-primary" :icon="Edit" @click="editProduct" style="min-width:120px;background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;">编辑商品</el-button>
+                  <el-button class="btn-danger" :icon="Delete" @click="delistProduct" style="min-width:120px;background:#ff3b30!important;color:#fff!important;">下架商品</el-button>
                 </div>
-                <div v-else class="buyer-actions">
-                  <el-button type="primary" plain :icon="ChatDotSquare" @click="contactSeller">联系卖家</el-button>
-                  <el-button 
-                    :type="isFavorited ? 'warning' : 'info'" 
-                    :icon="Star" 
+                <div v-else class="buyer-actions action-btn-group">
+                  <el-button class="btn-primary" :icon="ChatDotSquare" @click="contactSeller" style="min-width:120px;background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;">联系卖家</el-button>
+                  <el-button
+                    :icon="Star"
                     @click.stop="toggleFavorite"
-                    plain
+                    :style="isFavorited
+                      ? 'background:#ff9500 !important;color:#222 !important;border:none !important;min-width:120px;font-weight:bold;border-radius:16px;'
+                      : 'background:#409eff !important;color:#fff !important;border:none !important;min-width:120px;font-weight:bold;border-radius:16px;'"
                   >
                     {{ isFavorited ? '已收藏' : '收藏' }}
                   </el-button>
-                  <el-button type="success" size="large" :icon="Goods" @click="buyNow">立即购买</el-button>
+                  <el-button class="btn-success" size="large" :icon="Goods" @click="buyNow" style="min-width:120px;background:#34c759!important;color:#fff!important;">立即购买</el-button>
                 </div>
               </div>
             </el-col>
@@ -98,7 +102,7 @@
       </template>
     </el-skeleton>
 
-    <!-- “猜你喜欢”模块 -->
+    <!-- "猜你喜欢"模块 -->
     <div v-if="recommendations.length > 0" class="recommendation-section">
         <el-divider><h3>猜你喜欢</h3></el-divider>
         <el-row :gutter="20">
@@ -108,7 +112,7 @@
                     <div class="product-info">
                         <p class="product-title">{{ rec.title }}</p>
                         <div class="bottom">
-                            <span class="product-price">¥{{ rec.price }}</span>
+                            <span class="status-tag status-danger">¥{{ rec.price }}</span>
                         </div>
                     </div>
                 </el-card>
@@ -143,16 +147,6 @@ const allImages = computed(() => {
     // 使用 Set 去重，防止封面图和附图列表重复
     return [...new Set([product.value.coverImage, ...otherImages])].filter(url => url);
 });
-
-// 定义后端服务的地址，用于拼接完整的图片URL
-// const backendUrl = 'http://localhost:8080';
-
-// // 计算完整的图片URL
-// const fullImageUrl = (relativePath) => {
-//     if (!relativePath) return '';
-//     if (relativePath.startsWith('http')) return relativePath;
-//     return `${backendUrl}${relativePath}`;
-// };
 
 // 计算当前登录用户是否是该商品的卖家
 const isOwner = computed(() => {
@@ -234,89 +228,123 @@ watch(() => props.id, fetchAllData, { immediate: true });
 
 </script>
 
-<style scoped>
-.product-main-image {
+<style>
+.product-detail-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  padding: 32px 24px;
+  margin-bottom: 32px;
+}
+.carousel-image {
+  border-radius: 16px;
   width: 100%;
   height: 400px;
-  border-radius: 8px;
-  background-color: #f5f7fa;
+  object-fit: cover;
 }
-.image-slot {
+.carousel-item-wrapper {
+  height: 400px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
-  background: var(--el-fill-color-light);
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
+  justify-content: center;
+  background: #f5f6fa;
+  border-radius: 16px;
 }
-.description {
-  color: #606266;
-  margin: 15px 0;
-  line-height: 1.6;
-}
-.price {
-  font-size: 28px;
-  color: #F56C6C;
-  font-weight: bold;
+.price-line {
+  margin: 18px 0 10px 0;
 }
 .seller-box {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.seller-name {
-  font-weight: 500;
-}
-.seller-link {
-  text-decoration: none;
-  color: inherit;
-}
-.seller-link:hover .seller-name {
-  color: var(--el-color-primary);
-}
-.credit-score-tag {
-    display: inline-flex;
-    align-items: center;
-}
-.credit-score-tag .el-icon {
-    margin-right: 4px;
-}
-h1 {
-  margin-top: 0;
-}
-.action-buttons {
-  margin-top: 30px;
-}
-.buyer-actions {
+.seller-link { text-decoration: none; }
+.seller-name { font-weight: 500; }
+.action-buttons, .buyer-actions, .action-btn-group {
   display: flex;
-  gap: 15px;
+  gap: 14px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+  .product-detail-container {
+    padding: 10px 2px;
+  }
+  .carousel-image, .carousel-item-wrapper {
+    height: 220px;
+  }
+  .action-buttons, .buyer-actions, .action-btn-group {
+    gap: 8px;
+    margin-top: 12px;
+  }
 }
 .recommendation-section {
-    margin-top: 40px;
+  margin-top: 40px;
 }
-.product-card { cursor: pointer; margin-bottom: 20px;}
-.product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 4px; }
+.product-card {
+  cursor: pointer;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
+.product-card:hover {
+  box-shadow: 0 8px 32px 0 rgba(0,122,255,0.12);
+}
+.product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 12px; }
 .product-info { padding: 14px; }
 .product-title { font-size: 16px; color: #303133; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 8px 0; }
-.bottom { display: flex; justify-content: space-between; align-items: center; }
-.product-price { font-size: 18px; color: #F56C6C; font-weight: bold; }
-/* 为轮播图的每一项增加一个容器，用于设置背景和居中 */
-.carousel-item-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background-color: #f5f7fa;
-  border-radius: 8px;
-  overflow: hidden;
+.bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+/* 强化按钮色彩优先级，彻底覆盖 el-button 默认色 */
+.el-button.btn-primary,
+.el-button.btn-danger,
+.el-button.btn-success,
+.el-button.btn-info,
+.el-button.btn-warning {
+  background: inherit !important;
+  color: inherit !important;
+  border: none !important;
+  border-radius: 16px !important;
+  font-weight: 500 !important;
+  box-shadow: var(--color-shadow) !important;
 }
-
-.carousel-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 强制图片填满容器，保持统一大小 */
+/* 信誉分徽章动效与美化 */
+.credit-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(90deg, #e6f9ed 0%, #d0f5e2 100%);
+  color: #30d158;
+  font-weight: bold;
+  border-radius: 16px;
+  padding: 4px 16px;
+  font-size: 15px;
+  box-shadow: 0 2px 8px 0 rgba(48,209,88,0.08);
+  margin-left: 8px;
+  transition: all 0.3s cubic-bezier(.68,-0.55,.27,1.55);
+}
+.fade-bounce-enter-active {
+  animation: badge-bounce-in 0.6s;
+}
+@keyframes badge-bounce-in {
+  0% { opacity: 0; transform: scale(0.7) translateY(-20px); }
+  60% { opacity: 1; transform: scale(1.1) translateY(6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+/* 收藏按钮样式彻底穿透el-button */
+::v-deep(.el-button.btn-info) {
+  background: #409eff !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 16px !important;
+  font-weight: bold !important;
+  min-width: 120px !important;
+}
+::v-deep(.el-button.btn-warning) {
+  background: #ff9500 !important;
+  color: #222 !important;
+  border: none !important;
+  border-radius: 16px !important;
+  font-weight: bold !important;
+  min-width: 120px !important;
 }
 </style>

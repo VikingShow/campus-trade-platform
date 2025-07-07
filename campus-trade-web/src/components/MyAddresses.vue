@@ -2,25 +2,24 @@
   <div>
     <div class="address-header">
       <h3>我的收货地址</h3>
-      <el-button type="primary" :icon="Plus" @click="openDialog(null)">新增收货地址</el-button>
+      <el-button :icon="Plus" @click="openDialog(null)" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">新增收货地址</el-button>
     </div>
     <el-row :gutter="20" v-loading="loading">
       <el-col :span="12" v-for="address in addresses" :key="address.id" style="margin-bottom: 20px;">
         <el-card class="address-card" :class="{'is-default': address.isDefault}">
           <div class="card-header">
             <span>{{ address.recipientName }}</span>
-            <el-tag v-if="address.isDefault" type="success" size="small">默认地址</el-tag>
+            <span v-if="address.isDefault" class="status-tag status-success" style="margin-left:6px;">默认地址</span>
           </div>
           <div class="card-body">
             <p>{{ address.phone }}</p>
             <p>{{ `${address.province} ${address.city} ${address.district} ${address.detailedAddress}` }}</p>
           </div>
           <div class="card-footer">
-            <el-button text type="primary" @click="handleSetDefault(address.id)" v-if="!address.isDefault">设为默认</el-button>
-            <span v-else class="default-text"></span>
+            <el-button text @click="handleSetDefault(address.id)" v-if="!address.isDefault" :style="'background:#409eff!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">设为默认</el-button>
             <div>
-              <el-button text type="primary" @click="openDialog(address)">编辑</el-button>
-              <el-button text type="danger" @click="handleDelete(address.id)">删除</el-button>
+              <el-button text @click="openDialog(address)" :style="'background:#409eff!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">编辑</el-button>
+              <el-button text @click="handleDelete(address.id)" :style="'background:#ff3b30!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">删除</el-button>
             </div>
           </div>
         </el-card>
@@ -50,8 +49,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
+        <el-button @click="dialogVisible = false" :style="'background:#409eff!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">取消</el-button>
+        <el-button @click="handleSubmit" :loading="submitting" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">保存</el-button>
       </template>
     </el-dialog>
   </div>
@@ -171,7 +170,7 @@ const handleSetDefault = async (id) => {
 onMounted(fetchAddresses);
 </script>
 
-<style scoped>
+<style>
 .address-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .address-card { border-left: 5px solid transparent; }
 .address-card.is-default { border-left-color: var(--el-color-success); }

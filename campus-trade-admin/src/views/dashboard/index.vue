@@ -450,79 +450,129 @@ onUnmounted(() => {
 
 <style scoped>
 .dashboard-container {
-  padding: 20px;
+  padding: 0 0.5vw;
 }
-
 .time-selector {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
 }
-
 .time-label {
-  font-weight: bold;
-  color: #606266;
+  color: #888;
+  font-size: 15px;
+  margin-right: 8px;
+}
+.el-radio-group {
+  background: #f5f6fa;
+  border-radius: 16px;
+  padding: 4px 10px;
+}
+.el-radio-button__inner {
+  border-radius: 12px !important;
+  font-size: 15px;
+  padding: 6px 18px;
+  background: transparent;
+  color: #222;
+  transition: background 0.2s, color 0.2s;
+}
+.el-radio-button__orig-radio:checked + .el-radio-button__inner {
+  background: #e5e9f2;
+  color: #007aff;
+  box-shadow: 0 2px 8px 0 rgba(0,122,255,0.08);
 }
 
 .stat-card-clickable {
+  border-radius: 22px !important;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  transition: box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+  margin-bottom: 18px;
 }
-
 .stat-card-clickable:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--el-box-shadow-light);
+  box-shadow: 0 8px 32px 0 rgba(0,122,255,0.12);
+  transform: translateY(-4px) scale(1.02);
 }
-
 .stat-card {
   display: flex;
   align-items: center;
+  gap: 18px;
 }
-
-.stat-card .el-icon {
-  font-size: 48px;
-  margin-right: 20px;
+.icon-user, .icon-product, .icon-order, .icon-delivery {
+  font-size: 38px;
+  color: #007aff;
+  background: linear-gradient(120deg, #e0e5ec 0%, #f5f6fa 100%);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 8px 0 rgba(0,122,255,0.08);
 }
-
-.icon-user { color: #409EFF; }
-.icon-product { color: #67C23A; }
-.icon-order { color: #E6A23C; }
-.icon-delivery { color: #F56C6C; }
-
 .stat-info {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  gap: 2px;
 }
-
 .stat-title {
-  font-size: 16px;
-  color: #909399;
-  margin-bottom: 5px;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.stat-trend {
-  font-size: 14px;
+  font-size: 15px;
+  color: #888;
   font-weight: 500;
 }
-
-.stat-trend.positive {
-  color: #67C23A;
+.stat-value {
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #222;
+  margin: 2px 0 0 0;
 }
-
+.stat-trend {
+  font-size: 1em;
+  font-weight: 500;
+  margin-top: 2px;
+}
+.stat-trend.positive {
+  color: #34c759;
+}
 .stat-trend.negative {
-  color: #F56C6C;
+  color: #ff3b30;
 }
 
 .chart-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #222;
+}
+.el-card {
+  border-radius: 22px !important;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  border: none;
+  transition: box-shadow 0.2s;
+}
+.el-card:hover {
+  box-shadow: 0 8px 32px 0 rgba(0,122,255,0.12);
+}
+.el-tag {
+  border-radius: 10px;
+  font-size: 14px;
+  padding: 2px 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .stat-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .icon-user, .icon-product, .icon-order, .icon-delivery {
+    font-size: 30px;
+    padding: 8px;
+  }
+  .stat-value {
+    font-size: 1.5em;
+  }
 }
 </style>

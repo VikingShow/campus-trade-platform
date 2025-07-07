@@ -2,7 +2,7 @@
     <div>
         <div class="profile-header">
             <h3>个人信息</h3>
-            <el-button type="primary" :icon="Edit" circle @click="openDialog" />
+            <el-button :icon="Edit" circle @click="openDialog" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'" />
         </div>
         <el-descriptions :column="1" border>
             <!-- 【最终修正】显示学号而不是ID -->
@@ -40,8 +40,8 @@
                 </el-form-item>
             </el-form>
             <template #footer>
-                <el-button @click="dialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="handleSubmit" :loading="submitting">保存</el-button>
+                <el-button @click="dialogVisible = false" :style="'background:#409eff!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">取消</el-button>
+                <el-button @click="handleSubmit" :loading="submitting" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">保存</el-button>
             </template>
         </el-dialog>
     </div>

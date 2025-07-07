@@ -1,7 +1,7 @@
 <template>
   <div class="product-management">
     <div class="toolbar">
-      <h2>商品管理</h2>
+      <h2 class="page-title">商品管理</h2>
       <div class="actions">
         <el-input
           v-model="filters.keyword"
@@ -36,39 +36,36 @@
       </el-table-column>
       <el-table-column label="状态" width="120">
         <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.status)">
+          <span :class="['status-tag',
+            getStatusType(scope.row.status) === 'success' ? 'status-success' :
+            getStatusType(scope.row.status) === 'danger' ? 'status-danger' :
+            getStatusType(scope.row.status) === 'warning' ? 'status-warning' : 'status-info']">
             {{ formatStatus(scope.row.status) }}
-          </el-tag>
+          </span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="200" align="center">
         <template #default="scope">
-          <el-button size="small" @click="openDialog(scope.row)">编辑</el-button>
-          <el-button 
-            v-if="scope.row.status !== 'DELISTED'"
-            size="small" 
-            type="warning" 
-            @click="handleStatusUpdate(scope.row, 'DELISTED')" 
-            style="margin: 0 10px;"
-          >
-            下架
-          </el-button>
-           <el-button 
-            v-else
-            size="small" 
-            type="success" 
-            @click="handleStatusUpdate(scope.row, 'AVAILABLE')"
-            style="margin: 0 10px;"
-          >
-            上架
-          </el-button>
-          <el-button 
-            size="small" 
-            type="danger" 
-            @click="handleDelete(scope.row)"
-          >
-            删除
-          </el-button>
+          <div class="action-btn-group">
+            <el-button size="small" class="btn-primary" @click="openDialog(scope.row)">编辑</el-button>
+            <el-button 
+              v-if="scope.row.status !== 'DELISTED'"
+              size="small" 
+              class="btn-warning" 
+              @click="handleStatusUpdate(scope.row, 'DELISTED')"
+            >下架</el-button>
+            <el-button 
+              v-else
+              size="small" 
+              class="btn-success" 
+              @click="handleStatusUpdate(scope.row, 'AVAILABLE')"
+            >上架</el-button>
+            <el-button 
+              size="small" 
+              class="btn-danger" 
+              @click="handleDelete(scope.row)"
+            >删除</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -347,12 +344,195 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.actions { display: flex; align-items: center; }
-.pagination-container { display: flex; justify-content: center; margin-top: 20px; }
-/* 用于隐藏上传按钮的CSS */
-.hide-upload .el-upload--picture-card {
-    display: none;
+<style>
+.product-management {
+  padding: 18px 0.5vw 0 0.5vw;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+.toolbar h2 {
+  font-size: 2em;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+  letter-spacing: 1px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.el-input {
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 4px 0 rgba(60,60,60,0.04);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.el-input__inner {
+  border-radius: 14px;
+  font-size: 15px;
+  padding: 8px 14px;
+}
+.el-button {
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 8px 22px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.el-button--primary {
+  background: linear-gradient(90deg, #e0e5ec 0%, #f5f6fa 100%);
+  color: #007aff;
+  border: none;
+  box-shadow: 0 2px 8px 0 rgba(0,122,255,0.08);
+}
+.el-button--primary:hover {
+  background: #e5e9f2;
+  color: #007aff;
+}
+.el-button--danger {
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+}
+.el-button--danger:hover {
+  background: #ff6259;
+}
+.el-button--warning {
+  background: #ffd60a;
+  color: #222;
+  border: none;
+}
+.el-button--warning:hover {
+  background: #ffe066;
+}
+.el-button--success {
+  background: #34c759;
+  color: #fff;
+  border: none;
+}
+.el-button--success:hover {
+  background: #5be584;
+}
+
+.el-table {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  background: #fff;
+  margin-bottom: 18px;
+}
+.el-table th {
+  background: #f5f6fa !important;
+  color: #222;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1.5px solid #e0e5ec;
+}
+.el-table td {
+  font-size: 15px;
+  color: #222;
+  border-bottom: 1px solid #e0e5ec;
+}
+.el-table__row:hover td {
+  background: #e5e9f2 !important;
+  color: #007aff;
+}
+.el-table__body tr.current-row > td {
+  border-left: 4px solid #007aff;
+  background: #f0f8ff !important;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin: 18px 0 0 0;
+}
+.el-pagination {
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 8px 0 rgba(60,60,60,0.06);
+  padding: 6px 18px;
+}
+
+.el-dialog {
+  border-radius: 22px !important;
+  box-shadow: 0 8px 32px 0 rgba(60,60,60,0.12);
+  background: #fff;
+}
+.el-dialog__header {
+  font-size: 1.3em;
+  font-weight: 700;
+  color: #222;
+  padding-bottom: 8px;
+}
+.el-form {
+  padding: 8px 0 0 0;
+}
+.el-form-item {
+  margin-bottom: 18px;
+}
+.el-form-item__label {
+  font-weight: 600;
+  color: #222;
+  font-size: 15px;
+}
+.el-input-number {
+  border-radius: 12px;
+}
+.el-select {
+  border-radius: 12px;
+}
+.el-upload {
+  border-radius: 14px;
+}
+.el-rate {
+  font-size: 22px;
+}
+.el-tag {
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.action-btn-group {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.action-btn-group .el-button {
+  min-width: 60px;
+  height: 40px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  box-sizing: border-box;
+}
+@media (max-width: 900px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .action-btn-group {
+    gap: 8px;
+  }
+  .action-btn-group .el-button {
+    min-width: 48px;
+    height: 34px;
+    font-size: 14px;
+    padding: 0 10px;
+  }
 }
 </style>

@@ -12,11 +12,11 @@
           <el-input v-model="form.password" type="password" show-password placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%;">登录</el-button>
+          <el-button class="btn-primary" native-type="submit" :loading="loading" style="width: 100%;">登录</el-button>
         </el-form-item>
       </el-form>
       <div class="link-area">
-         <router-link to="/register">还没有账号？立即注册</router-link>
+         <router-link to="/register" class="btn-info" style="display:inline-block;padding:6px 18px;border-radius:14px;">还没有账号？立即注册</router-link>
       </div>
     </el-card>
   </div>
@@ -64,7 +64,7 @@ const handleLogin = async () => {
 };
 </script>
 
-<style scoped>
+<style>
 .form-container {
   display: flex;
   justify-content: center;

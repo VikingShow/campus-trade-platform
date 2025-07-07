@@ -1,79 +1,298 @@
+/*
+色彩策略说明：
+- 主色（苹果蓝）：#007aff（白天），#409eff（夜间）
+- 成功色（苹果绿）：#34c759（白天），#30d158（夜间）
+- 危险色（红）：#ff3b30（白天），#ff453a（夜间）
+- 警告色（橙）：#ff9500（白天），#ffd60a（夜间）
+- 信息色（蓝）：#409eff（白天），#64aaff（夜间）
+- 背景色：#f5f6fa（白天），#181c20（夜间）
+- 卡片色：#fff（白天），#23272e（夜间）
+- 状态标签、按钮、表格、弹窗、表单等全部用CSS变量适配
+- 可根据运营活动/节日临时调整主色或Banner
+*/
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'PingFang SC', 'Helvetica Neue', Arial, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
   font-weight: 400;
-
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #222;
+  background-color: #f5f6fa;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --color-bg: #f5f6fa;
+  --color-bg-card: #fff;
+  --color-text: #222;
+  --color-primary: #007aff;
+  --color-success: #34c759;
+  --color-danger: #ff3b30;
+  --color-warning: #ff9500;
+  --color-info: #409eff;
+  --color-border: #e0e5ec;
+  --color-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  --color-shadow-hover: 0 8px 32px 0 rgba(0,122,255,0.12);
+  --color-tag-success-bg: #e6f9ed;
+  --color-tag-success-text: #34c759;
+  --color-tag-danger-bg: #ffeaea;
+  --color-tag-danger-text: #ff3b30;
+  --color-tag-warning-bg: #fff7e0;
+  --color-tag-warning-text: #ff9500;
+  --color-tag-info-bg: #eaf3ff;
+  --color-tag-info-text: #007aff;
+}
+[data-theme='dark'] {
+  --color-bg: #181c20;
+  --color-bg-card: #23272e;
+  --color-text: #f5f6fa;
+  --color-primary: #409eff;
+  --color-success: #30d158;
+  --color-danger: #ff453a;
+  --color-warning: #ffd60a;
+  --color-info: #64aaff;
+  --color-border: #2c2f36;
+  --color-shadow: 0 4px 24px 0 rgba(0,0,0,0.30);
+  --color-shadow-hover: 0 8px 32px 0 rgba(0,122,255,0.20);
+  --color-tag-success-bg: #1e2e22;
+  --color-tag-success-text: #30d158;
+  --color-tag-danger-bg: #2e1e1e;
+  --color-tag-danger-text: #ff453a;
+  --color-tag-warning-bg: #2e2a1e;
+  --color-tag-warning-text: #ffd60a;
+  --color-tag-info-bg: #1e2530;
+  --color-tag-info-text: #64aaff;
+}
+body, #app {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background 0.3s, color 0.3s;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: #007aff;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 a:hover {
-  color: #535bf2;
+  color: #0051a8;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+h1, h2, h3, h4, h5, h6 {
+  font-family: inherit;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 0.5em;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  border-radius: 16px;
+  border: none;
+  padding: 0.7em 1.6em;
+  font-size: 1.05em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background: linear-gradient(90deg, #e0e5ec 0%, #f5f6fa 100%);
+  color: #222;
+  box-shadow: 0 2px 8px 0 rgba(60,60,60,0.06);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
 }
 button:hover {
-  border-color: #646cff;
+  background: #e5e9f2;
+  color: #007aff;
+  box-shadow: 0 4px 16px 0 rgba(60,60,60,0.10);
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+button:focus {
+  outline: 2px solid #007aff;
 }
 
-.card {
+input, select, textarea {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  padding: 0.6em 1em;
+  font-size: 1em;
+  font-family: inherit;
+  background: var(--color-bg-card);
+  box-shadow: 0 1px 4px 0 rgba(60,60,60,0.04);
+  transition: border 0.2s, box-shadow 0.2s, background 0.3s;
+  color: var(--color-text);
+}
+input:focus, select:focus, textarea:focus {
+  border: 1.5px solid var(--color-primary);
+  box-shadow: 0 2px 8px 0 rgba(0,122,255,0.08);
+  outline: none;
+}
+
+.card, .el-card, .v-card {
+  background: var(--color-bg-card);
+  border-radius: 20px;
+  box-shadow: var(--color-shadow);
   padding: 2em;
+  margin-bottom: 2em;
+  transition: box-shadow 0.2s, background 0.3s;
+}
+.card:hover, .el-card:hover, .v-card:hover {
+  box-shadow: var(--color-shadow-hover);
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2.5rem 1.5rem;
   text-align: center;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* 表格美化 */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-bg-card);
+  border-radius: 16px;
+  box-shadow: var(--color-shadow);
+  overflow: hidden;
+  color: var(--color-text);
+}
+th, td {
+  padding: 1em;
+  text-align: left;
+}
+th {
+  background: #f5f6fa;
+  color: var(--color-text);
+  font-weight: 600;
+}
+tr {
+  border-bottom: 1px solid var(--color-border);
+}
+tr:last-child {
+  border-bottom: none;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e9ebf0;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cfd8dc;
+  border-radius: 8px;
+}
+
+/* 响应式优化 */
+@media (max-width: 600px) {
+  .card, .el-card, .v-card {
+    padding: 1em;
   }
-  a:hover {
-    color: #747bff;
+  #app {
+    padding: 1rem 0.2rem;
   }
-  button {
-    background-color: #f9f9f9;
-  }
+}
+
+/* 全局状态标签统一风格 */
+.status-tag {
+  display: inline-block;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 2px 14px;
+  line-height: 1.6;
+  background: var(--color-tag-info-bg);
+  color: var(--color-tag-info-text);
+  margin-right: 2px;
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+}
+.status-success {
+  background: var(--color-tag-success-bg) !important;
+  color: var(--color-tag-success-text) !important;
+}
+.status-danger {
+  background: var(--color-tag-danger-bg) !important;
+  color: var(--color-tag-danger-text) !important;
+}
+.status-warning {
+  background: var(--color-tag-warning-bg) !important;
+  color: var(--color-tag-warning-text) !important;
+}
+.status-info {
+  background: var(--color-tag-info-bg) !important;
+  color: var(--color-tag-info-text) !important;
+}
+
+/* 全局页面标题统一风格 */
+.page-title {
+  font-size: 2em;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 18px 0;
+  letter-spacing: 1px;
+  text-align: left;
+  line-height: 1.2;
+}
+
+/* 苹果风柔和渐变按钮 */
+.btn-primary {
+  background: linear-gradient(90deg, #6aa8ff 0%, #409eff 100%) !important;
+  color: #f8f9fa !important;
+  border: none !important;
+  border-radius: 22px !important;
+  box-shadow: 0 2px 8px rgba(64,158,255,0.08) !important;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #409eff 0%, #6aa8ff 100%) !important;
+  color: #f8f9fa !important;
+  box-shadow: 0 4px 16px rgba(64,158,255,0.12) !important;
+}
+.btn-danger {
+  background: linear-gradient(90deg, #ff7b6a 0%, #ff3b30 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 22px !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255,59,48,0.08) !important;
+}
+.btn-danger:hover {
+  background: linear-gradient(90deg, #ff3b30 0%, #ff7b6a 100%) !important;
+}
+.btn-warning {
+  background: linear-gradient(90deg, #ffe0a6 0%, #ffb300 100%) !important;
+  color: #7a4e00 !important;
+  border: none !important;
+  border-radius: 22px !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255,179,0,0.08) !important;
+}
+.btn-warning:hover {
+  background: linear-gradient(90deg, #ffb300 0%, #ffe0a6 100%) !important;
+  color: #fff !important;
+}
+.btn-success {
+  background: linear-gradient(90deg, #a8ffb0 0%, #34c759 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 22px !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(52,199,89,0.08) !important;
+}
+.btn-success:hover {
+  background: linear-gradient(90deg, #34c759 0%, #a8ffb0 100%) !important;
+}
+.btn-info {
+  background: linear-gradient(90deg, #a6c8ff 0%, #409eff 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 22px !important;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(64,158,255,0.08) !important;
+}
+.btn-info:hover {
+  background: linear-gradient(90deg, #409eff 0%, #a6c8ff 100%) !important;
 }

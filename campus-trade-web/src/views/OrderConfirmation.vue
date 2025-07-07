@@ -49,19 +49,19 @@
                     :class="{'selected': form.shippingAddressId === addr.id}"
                     @click="form.shippingAddressId = addr.id"
                 >
-                    <div class="addr-title">{{ addr.recipientName }} ({{ addr.phone }}) <el-tag v-if="addr.isDefault" size="small">默认</el-tag></div>
+                    <div class="addr-title">{{ addr.recipientName }} ({{ addr.phone }}) <span v-if="addr.isDefault" class="status-tag status-info" style="margin-left:6px;">默认</span></div>
                     <div class="addr-detail">{{ `${addr.province} ${addr.city} ${addr.district} ${addr.detailedAddress}` }}</div>
                 </div>
             </div>
             <el-empty v-else description="您还没有收货地址"></el-empty>
-            <el-button type="primary" plain @click="$router.push('/dashboard/addresses')" style="margin-top: 10px;">管理收货地址</el-button>
+            <el-button @click="$router.push('/dashboard/addresses')" style="margin-top: 10px;background:#409eff!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;">管理收货地址</el-button>
         </div>
       </div>
       
        <div class="action-footer">
           <span>总计: </span>
           <span class="total-price">¥{{ product.price }}</span>
-          <el-button type="primary" size="large" @click="submitOrder" :loading="submitting">提交订单</el-button>
+          <el-button size="large" @click="submitOrder" :loading="submitting" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">提交订单</el-button>
        </div>
     </div>
      <el-empty v-else description="商品信息加载失败"></el-empty>
