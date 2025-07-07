@@ -6,6 +6,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 import './api/axios.config' // 导入以确保拦截器被设置
+import './style.css'
 
 const app = createApp(App)
 

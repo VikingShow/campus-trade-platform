@@ -96,6 +96,7 @@ body {
   justify-content: space-between;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg-card);
+  color: var(--color-text);
   padding: 0 20px;
   position: sticky;
   top: 0;
@@ -135,5 +136,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    background: var(--color-bg);
+    color: var(--color-text);
 }
 </style>

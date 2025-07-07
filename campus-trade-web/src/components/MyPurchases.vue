@@ -93,7 +93,14 @@ const openRatingDialog = (order) => {
 
 onMounted(fetchOrders);
 
-const statusMap = { 'AWAITING_MEETUP': { text: '待交易', type: 'warning' }, 'COMPLETED': { text: '已完成', type: 'success' }, 'CANCELLED': { text: '已取消', type: 'info' } };
+const statusMap = {
+  'AWAITING_MEETUP': { text: '待交易', type: 'warning' },
+  'AWAITING_SHIPMENT': { text: '待发货', type: 'warning' },
+  'SHIPPED': { text: '已发货', type: 'info' },
+  'DELIVERED': { text: '已送达', type: 'success' },
+  'COMPLETED': { text: '已完成', type: 'success' },
+  'CANCELLED': { text: '已取消', type: 'info' }
+};
 const formatStatus = (status) => statusMap[status]?.text || '未知';
 const getStatusType = (status) => statusMap[status]?.type || 'info';
 </script>

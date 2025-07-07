@@ -29,7 +29,7 @@
   --color-danger: #ff3b30;
   --color-warning: #ff9500;
   --color-info: #409eff;
-  --color-border: #e0e5ec;
+  --color-border: #e4e7ed;
   --color-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
   --color-shadow-hover: 0 8px 32px 0 rgba(0,122,255,0.12);
   --color-tag-success-bg: #e6f9ed;
@@ -43,14 +43,14 @@
 }
 [data-theme='dark'] {
   --color-bg: #181c20;
-  --color-bg-card: #23272e;
+  --color-bg-card: #222;
   --color-text: #f5f6fa;
   --color-primary: #409eff;
   --color-success: #30d158;
   --color-danger: #ff453a;
   --color-warning: #ffd60a;
   --color-info: #64aaff;
-  --color-border: #2c2f36;
+  --color-border: #444;
   --color-shadow: 0 4px 24px 0 rgba(0,0,0,0.30);
   --color-shadow-hover: 0 8px 32px 0 rgba(0,122,255,0.20);
   --color-tag-success-bg: #1e2e22;
@@ -129,11 +129,12 @@ input:focus, select:focus, textarea:focus {
 
 .card, .el-card, .v-card {
   background: var(--color-bg-card);
+  color: var(--color-text);
   border-radius: 20px;
   box-shadow: var(--color-shadow);
   padding: 2em;
   margin-bottom: 2em;
-  transition: box-shadow 0.2s, background 0.3s;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
 }
 .card:hover, .el-card:hover, .v-card:hover {
   box-shadow: var(--color-shadow-hover);
@@ -295,4 +296,100 @@ tr:last-child {
 }
 .btn-info:hover {
   background: linear-gradient(90deg, #409eff 0%, #a6c8ff 100%) !important;
+}
+
+/* 全局Element Plus组件夜间模式适配 */
+.el-card,
+.el-header,
+.el-main,
+.el-table,
+.el-table th,
+.el-table td {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+  transition: background 0.3s, color 0.3s;
+}
+.el-table tr {
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+/* 优雅的夜间模式CSS变量方案 */
+:root {
+  --color-bg: #f5f6fa;
+  --color-bg-card: #fff;
+  --color-text: #222;
+  --color-primary: #007aff;
+  --color-success: #34c759;
+  --color-danger: #ff3b30;
+  --color-warning: #ff9500;
+  --color-info: #409eff;
+  --color-border: #e4e7ed;
+  --color-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
+  --color-shadow-hover: 0 8px 32px 0 rgba(0,122,255,0.12);
+  --color-tag-success-bg: #e6f9ed;
+  --color-tag-success-text: #34c759;
+  --color-tag-danger-bg: #ffeaea;
+  --color-tag-danger-text: #ff3b30;
+  --color-tag-warning-bg: #fff7e0;
+  --color-tag-warning-text: #ff9500;
+  --color-tag-info-bg: #eaf3ff;
+  --color-tag-info-text: #007aff;
+}
+[data-theme='dark'] {
+  --color-bg: #181c20;
+  --color-bg-card: #222;
+  --color-text: #f5f6fa;
+  --color-primary: #409eff;
+  --color-success: #30d158;
+  --color-danger: #ff453a;
+  --color-warning: #ffd60a;
+  --color-info: #64aaff;
+  --color-border: #444;
+  --color-shadow: 0 4px 24px 0 rgba(0,0,0,0.30);
+  --color-shadow-hover: 0 8px 32px 0 rgba(0,122,255,0.20);
+  --color-tag-success-bg: #1e2e22;
+  --color-tag-success-text: #30d158;
+  --color-tag-danger-bg: #2e1e1e;
+  --color-tag-danger-text: #ff453a;
+  --color-tag-warning-bg: #2e2a1e;
+  --color-tag-warning-text: #ffd60a;
+  --color-tag-info-bg: #1e2530;
+  --color-tag-info-text: #64aaff;
+}
+
+body, #app {
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background 0.3s, color 0.3s;
+}
+
+.el-card, .card, .v-card {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  box-shadow: var(--color-shadow);
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.el-header, .header {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.el-main, .main-content {
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background 0.3s, color 0.3s;
+}
+
+.el-table, .el-table th, .el-table td, table, th, td {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.el-table tr, tr {
+  border-bottom: 1px solid var(--color-border);
 }

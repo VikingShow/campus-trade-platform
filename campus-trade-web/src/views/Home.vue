@@ -49,22 +49,21 @@
       <!-- 商品列表 -->
       <el-row :gutter="20" v-loading="loading" style="margin-top: 20px;">
         <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in products" :key="product.id" style="margin-bottom: 20px;">
-          <el-card shadow="hover" class="product-card home-recommend-card" @click="goToDetail(product.id)">
-            <div class="image-container">
-                <img :src="product.coverImage" class="product-image" alt="商品图片" @error="onImageError"/>
-                <!-- 【新增】如果商品有多张图片，显示一个角标 -->
-                <div v-if="product.imageUrls && product.imageUrls.length > 0" class="image-count-overlay">
-                    <el-icon><CameraFilled /></el-icon>
-                    <span>1 / {{ 1 + product.imageUrls.length }}</span>
-                </div>
-             </div>
-             <div class="product-info">
-               <p class="product-title">{{ product.title }}</p>
-               <div class="bottom">
-                 <span class="status-tag status-danger price-tag">¥{{ product.price }}</span>
-                 <span class="status-tag status-info">{{ product.sellerNickname }}</span>
-               </div>
-             </div>
+          <el-card shadow="hover" class="product-card" @click="goToDetail(product.id)">
+            <div class="product-image-area">
+              <img :src="product.coverImage" class="product-image" alt="商品图片" @error="onImageError"/>
+              <div v-if="product.imageUrls && product.imageUrls.length > 0" class="image-count-overlay">
+                <el-icon><CameraFilled /></el-icon>
+                <span>1 / {{ 1 + product.imageUrls.length }}</span>
+              </div>
+            </div>
+            <div class="product-info-area">
+              <div class="product-title">{{ product.title }}</div>
+              <div class="product-meta">
+                <span class="product-price">¥{{ product.price }}</span>
+                <span class="product-seller">{{ product.sellerNickname }}</span>
+              </div>
+            </div>
           </el-card>
         </el-col>
       </el-row>
@@ -158,7 +157,7 @@ onMounted(() => {
     margin-bottom: 20px;
     border-radius: 18px;
     box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
-    background: #fff;
+    background: var(--color-bg-card);
 }
 .price-range {
     display: flex;
@@ -169,58 +168,88 @@ onMounted(() => {
     color: #909399;
 }
 .product-card {
-    cursor: pointer;
-    border-radius: 18px;
-    box-shadow: 0 4px 24px 0 rgba(60,60,60,0.10);
-    background: #fff;
-    transition: box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(60,60,60,0.10);
+  background: var(--color-bg-card);
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
 }
 .product-card:hover {
-    box-shadow: 0 8px 32px 0 rgba(0,122,255,0.12);
+  box-shadow: 0 8px 32px 0 rgba(0,122,255,0.15);
+  transform: translateY(-4px) scale(1.03);
 }
-.image-container {
-    position: relative;
-    width: 100%;
-    height: 200px;
+.product-image-area {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #f5f6fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 0;
+  overflow: hidden;
 }
-.product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 12px; }
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+}
 .image-count-overlay {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
 }
-.image-count-overlay .el-icon {
-    margin-right: 4px;
+.product-info-area {
+  padding: 10px 8px 8px 8px;
+  background: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.product-info { padding: 14px; }
-.product-title { font-size: 16px; color: #303133; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 8px 0; }
-.bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.home-recommend-card {
-  border: 2px solid transparent;
-  transition: border 0.2s, box-shadow 0.2s;
+.product-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.home-recommend-card:hover {
-  border-image: linear-gradient(90deg, #6a93ff 0%, #a685ff 100%) 1;
-  box-shadow: 0 8px 32px 0 rgba(106,147,255,0.18);
+.product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
-/* 让首页价格更突出，防止被覆盖 */
-.price-tag {
-  font-size: 20px !important;
-  font-weight: bold !important;
-  color: var(--color-tag-danger-text) !important;
-  color: #ff3b30 !important;
-  background: transparent !important;
-  box-shadow: none;
-  letter-spacing: 1px;
-  vertical-align: bottom;
-  margin-top: 6px;
-  display: inline-block;
+.product-price {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #ff3b30;
+}
+.product-seller {
+  font-size: 0.98rem;
+  color: #888;
+  background: #f0f4fa;
+  border-radius: 8px;
+  padding: 2px 10px;
+}
+@media (max-width: 600px) {
+  .product-info-area { padding: 10px 8px 8px 8px; }
+  .product-title { font-size: 1rem; }
+  .product-price, .product-seller { font-size: 0.98rem; }
 }
 </style>

@@ -4,18 +4,18 @@
         <el-row :gutter="20" v-loading="loading">
             <el-col :xs="24" :sm="12" :md="8" :lg="6" v-for="product in favoriteProducts" :key="product.id" style="margin-bottom: 20px;">
                 <el-card shadow="hover" class="product-card">
-                    <div @click="goToDetail(product.id)">
-                        <img :src=product.coverImage class="product-image" alt="商品图片" @error="onImageError"/>
-                        <div class="product-info">
-                            <p class="product-title">{{ product.title }}</p>
-                            <div class="bottom">
-                                <span class="product-price">¥{{ product.price }}</span>
-                                <span class="seller-info">{{ product.sellerNickname }}</span>
-                            </div>
+                    <div class="product-image-area" @click="goToDetail(product.id)">
+                        <img :src="product.coverImage" class="product-image" alt="商品图片" @error="onImageError"/>
+                    </div>
+                    <div class="product-info-area">
+                        <div class="product-title">{{ product.title }}</div>
+                        <div class="product-meta">
+                            <span class="product-price">¥{{ product.price }}</span>
+                            <span class="product-seller">{{ product.sellerNickname }}</span>
                         </div>
                     </div>
                     <div class="unfavorite-btn">
-                        <el-button plain size="small" @click="handleRemoveFavorite(product.id)" :style="'background:#ff3b30!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">取消收藏</el-button>
+                        <el-button plain size="small" @click.stop="handleRemoveFavorite(product.id)" :style="'background:#ff3b30!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'">取消收藏</el-button>
                     </div>
                 </el-card>
             </el-col>
@@ -74,13 +74,86 @@ onMounted(fetchFavorites);
 </script>
 
 <style>
-.product-card { cursor: pointer; position: relative; }
-.product-image { width: 100%; height: 200px; object-fit: cover; display: block; border-radius: 4px; }
-.product-info { padding: 14px; }
-.product-title { font-size: 16px; color: #303133; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 8px 0; }
-.bottom { display: flex; justify-content: space-between; align-items: center; }
-.product-price { font-size: 18px; color: #F56C6C; font-weight: bold; }
-.seller-info { font-size: 13px; color: #909399; }
+.product-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px 0 rgba(60,60,60,0.10);
+    background: var(--color-bg-card);
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+.product-card:hover {
+    box-shadow: 0 8px 32px 0 rgba(0,122,255,0.15);
+    transform: translateY(-4px) scale(1.03);
+}
+.product-image-area {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #f5f6fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 0;
+    overflow: hidden;
+}
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+}
+.product-info-area {
+    padding: 4px 2px 4px 2px;
+    background: var(--color-bg-card);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+:deep(.el-card__body) {
+    padding: 0;
+}
+.product-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.3;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
+.product-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 6px;
+}
+.product-price {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #ff3b30;
+    text-align: left;
+}
+.product-seller {
+    font-size: 0.98rem;
+    color: #888;
+    background: #f0f4fa;
+    border-radius: 8px;
+    padding: 2px 8px;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+}
 .unfavorite-btn {
     position: absolute;
     top: 10px;
@@ -90,5 +163,10 @@ onMounted(fetchFavorites);
 }
 .product-card:hover .unfavorite-btn {
     opacity: 1;
+}
+@media (max-width: 600px) {
+    .product-info-area { padding: 10px 8px 8px 8px; }
+    .product-title { font-size: 1rem; }
+    .product-price, .product-seller { font-size: 0.98rem; }
 }
 </style>
