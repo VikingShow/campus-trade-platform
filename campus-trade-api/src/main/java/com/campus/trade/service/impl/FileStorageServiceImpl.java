@@ -5,6 +5,7 @@ import com.campus.trade.service.FileStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,15 +21,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     private final Path fileStorageLocation;
 
     /**
-     * 【最终修正】构造函数不再需要任何注入。
-     * 我们将动态地获取项目的当前工作目录，并在此目录下创建uploads文件夹。
+     * 构造函数支持通过配置文件动态指定上传目录，兼容本地和生产环境。
      */
-    public FileStorageServiceImpl() {
-        // 创建一个指向当前工作目录下的 "uploads" 文件夹的路径
-        // 【修正】使用相对路径，与WebConfig中的静态资源映射保持一致
-        this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+    public FileStorageServiceImpl(@Value("${file.upload-dir:uploads}") String uploadDir) {
+        // 支持相对路径和绝对路径
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
-            // 如果这个目录不存在，就创建它
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
             throw new CustomException("无法创建用于存储上传文件的目录！ " + ex.getMessage());
