@@ -8,12 +8,14 @@ public class UserProfileDTO {
     private String nickname;
     private String avatar;
     private Integer creditScore;
+    private String username; // 学号
 
     public UserProfileDTO(User user) {
         this.id = user.getId();
         this.nickname = user.getNickname();
         this.avatar = user.getAvatar();
         this.creditScore = user.getCreditScore();
+        this.username = user.getUsername();
     }
 
     // Getters
@@ -21,4 +23,5 @@ public class UserProfileDTO {
     public String getNickname() { return nickname; }
     public String getAvatar() { return avatar; }
     public Integer getCreditScore() { return creditScore; }
+    public String getUsername() { return username; }
 }

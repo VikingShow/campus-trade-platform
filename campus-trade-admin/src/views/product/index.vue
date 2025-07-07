@@ -108,7 +108,13 @@
         <el-form-item label="新旧程度" prop="conditionLevel">
           <el-rate v-model="form.conditionLevel" />
         </el-form-item>
-        <el-form-item label="商品图片" prop="fileList" v-if="!isEdit">
+        <el-form-item label="配送方式" prop="deliveryOptions">
+          <el-checkbox-group v-model="form.deliveryOptions">
+            <el-checkbox value="MEETUP">线下面交</el-checkbox>
+            <el-checkbox value="SHIPPING">支持快递</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="商品图片" prop="fileList">
             <!-- 【关键修正】使用 on-change 钩子来处理文件状态变化 -->
             <el-upload
                 v-model:file-list="form.fileList"
@@ -140,7 +146,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useAuthStore } from '../../stores/authStore';
-import { getAllProductsAdmin, updateProductStatusAdmin, updateProductByAdmin, deleteProductAdmin, createProductByAdmin, getAllUsers } from '../../api/admin';
+import { getAllProductsAdmin, updateProductStatusAdmin, updateProductByAdmin, deleteProductAdmin, createProductByAdmin, getAllUsers, getProductDetailAdmin } from '../../api/admin';
 import apiClient from '../../api/axios.config';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Search } from '@element-plus/icons-vue';
@@ -154,6 +160,8 @@ const submitting = ref(false);
 const dialogVisible = ref(false);
 const formRef = ref(null);
 const categoriesLoading = ref(false);
+const previewVisible = ref(false);
+const previewImageUrl = ref('');
 
 const filters = reactive({ keyword: '' });
 const pagination = reactive({ page: 1, size: 10, total: 0 });
@@ -166,6 +174,7 @@ const form = reactive({
   categoryId: '',
   conditionLevel: 3,
   fileList: [],
+  deliveryOptions: []
 });
 
 const isEdit = computed(() => !!form.id);
@@ -223,15 +232,48 @@ const handleFilterChange = () => { pagination.page = 1; fetchProducts(); };
 const handleSizeChange = (newSize) => { pagination.size = newSize; fetchProducts(); };
 const handleCurrentChange = (newPage) => { pagination.page = newPage; fetchProducts(); };
 
-const openDialog = (rowData) => {
+const openDialog = async (rowData) => {
   resetForm();
-  if (rowData) { // 编辑模式
+  if (rowData && rowData.id) { // 编辑模式
+    // 通过详情接口获取完整商品信息
+    const { data } = await getProductDetailAdmin(rowData.id);
+    const detail = data.data;
+    Object.assign(form, detail);
+    const allImages = [detail.coverImage, ...(detail.imageUrls || [])].filter(Boolean);
+    form.fileList = Array.from(new Set(allImages)).map((url, idx) => ({
+      name: idx === 0 ? '主图' : `附图${idx}`,
+      url,
+      status: 'success',
+    }));
+    // 配送方式回显
+    if (typeof detail.deliveryOptions === 'string') {
+      form.deliveryOptions = detail.deliveryOptions.split(',');
+    } else if (Array.isArray(detail.deliveryOptions)) {
+      form.deliveryOptions = detail.deliveryOptions;
+    } else {
+      form.deliveryOptions = [];
+    }
+  } else if (rowData) {
+    // 新增商品或无id时，兼容原有逻辑
     Object.assign(form, rowData);
+    const allImages = [rowData.coverImage, ...(rowData.imageUrls || [])].filter(Boolean);
+    form.fileList = Array.from(new Set(allImages)).map((url, idx) => ({
+      name: idx === 0 ? '主图' : `附图${idx}`,
+      url,
+      status: 'success',
+    }));
+    if (typeof rowData.deliveryOptions === 'string') {
+      form.deliveryOptions = rowData.deliveryOptions.split(',');
+    } else if (Array.isArray(rowData.deliveryOptions)) {
+      form.deliveryOptions = rowData.deliveryOptions;
+    } else {
+      form.deliveryOptions = [];
+    }
   }
   dialogVisible.value = true;
 };
 
-const resetForm = () => { Object.assign(form, { id: null, sellerId: '', title: '', description: '', price: 0.01, categoryId: '', conditionLevel: 3, fileList: [] }); };
+const resetForm = () => { Object.assign(form, { id: null, sellerId: '', title: '', description: '', price: 0.01, categoryId: '', conditionLevel: 3, fileList: [], deliveryOptions: [] }); };
 
 const handleUploadSuccess = (response, uploadFile, uploadFiles) => { 
   // 确保 uploadFile 有 response 属性
@@ -265,17 +307,20 @@ const handleSubmit = async () => {
     if (valid) {
       submitting.value = true;
       try {
-        // 【最终修正】从 file.url 获取路径，并过滤掉未上传成功的文件
+        // fileList 里的所有图片都作为图片字段提交
         const imageUrls = form.fileList
             .filter(file => file.status === 'success' && file.url)
             .map(file => file.url);
-
         if (imageUrls.length === 0 && !isEdit.value) {
             ElMessage.error('请至少上传一张图片并等待上传成功。');
             submitting.value = false;
             return;
         }
-
+        // deliveryOptions 保证为普通数组且只用'SHIPPING'
+        let deliveryOptions = Array.isArray(form.deliveryOptions) ? [...form.deliveryOptions] : [form.deliveryOptions];
+        // 不做任何DELIVERY/SHIPPING转换
+        // 限制图片最多3张
+        const limitedImages = imageUrls.slice(0, 3);
         const payload = {
           sellerId: form.sellerId,
           title: form.title,
@@ -283,11 +328,12 @@ const handleSubmit = async () => {
           price: form.price,
           categoryId: form.categoryId,
           conditionLevel: form.conditionLevel,
-          coverImage: imageUrls[0],
-          imageUrls: imageUrls.slice(1),
-          deliveryOptions: 'MEETUP' // 添加默认的配送方式
+          coverImage: limitedImages[0],
+          imageUrls: limitedImages.slice(1),
+          deliveryOptions: deliveryOptions
         };
-
+        // 打印payload调试
+        console.log('提交payload', payload);
         if (isEdit.value) {
           await updateProductByAdmin(form.id, payload);
           ElMessage.success('商品信息更新成功');

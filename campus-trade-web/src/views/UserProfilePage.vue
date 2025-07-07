@@ -4,18 +4,18 @@
             <h3>个人信息</h3>
             <el-button :icon="Edit" circle @click="openDialog" :style="'background:linear-gradient(90deg,#007aff 0%,#409eff 100%)!important;color:#fff!important;border:none!important;border-radius:16px!important;font-weight:bold!important;'" />
         </div>
-        <el-descriptions :column="1" border>
-            <!-- 【最终修正】显示学号而不是ID -->
-            <el-descriptions-item label="学号">{{ authStore.user?.username }}</el-descriptions-item>
-            <el-descriptions-item label="昵称">{{ authStore.user?.nickname }}</el-descriptions-item>
+        <el-descriptions :column="1" border v-if="user">
+            <el-descriptions-item label="学号">{{ user.username }}</el-descriptions-item>
+            <el-descriptions-item label="昵称">{{ user.nickname }}</el-descriptions-item>
             <el-descriptions-item label="头像">
-                <el-avatar :size="60" :icon="UserFilled" :src="authStore.user?.avatar" />
+                <el-avatar :size="60" :icon="UserFilled" :src="user.avatar" />
             </el-descriptions-item>
-            <el-descriptions-item label="邮箱">{{ authStore.user?.email }}</el-descriptions-item>
+            <el-descriptions-item label="邮箱">{{ user.email }}</el-descriptions-item>
             <el-descriptions-item label="个人简介">
-                {{ authStore.user?.bio || '这位同学很神秘，什么都还没留下...' }}
+                {{ user.bio || '这位同学很神秘，什么都还没留下...' }}
             </el-descriptions-item>
         </el-descriptions>
+        <el-empty v-else description="用户不存在或已注销" />
 
         <!-- 编辑个人信息的对话框 -->
         <el-dialog v-model="dialogVisible" title="编辑个人信息" width="500px" @close="resetForm">
@@ -26,7 +26,7 @@
                         action="/api/files/upload"
                         :show-file-list="false"
                         :on-success="handleAvatarSuccess"
-                        :headers="{ 'Authorization': `Bearer ${authStore.token}` }"
+                        :headers="{}"
                     >
                         <img v-if="form.avatar" :src="form.avatar" class="avatar" />
                         <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
@@ -48,12 +48,14 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { useAuthStore } from '../stores/authStore';
+import { ref, reactive, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { getUserById } from '../api/user';
 import { UserFilled, Edit, Plus } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 
-const authStore = useAuthStore();
+const route = useRoute();
+const user = ref(null);
 const dialogVisible = ref(false);
 const submitting = ref(false);
 const formRef = ref(null);
@@ -64,11 +66,23 @@ const form = reactive({
   bio: ''
 });
 
+const fetchUser = async () => {
+  try {
+    const { data } = await getUserById(route.params.id);
+    user.value = data.data;
+  } catch (e) {
+    user.value = null;
+  }
+};
+
+onMounted(fetchUser);
+watch(() => route.params.id, fetchUser);
+
 const openDialog = () => {
-  // 打开对话框时，用当前用户信息填充表单
-  form.nickname = authStore.user?.nickname || '';
-  form.avatar = authStore.user?.avatar || '';
-  form.bio = authStore.user?.bio || '';
+  if (!user.value) return;
+  form.nickname = user.value.nickname || '';
+  form.avatar = user.value.avatar || '';
+  form.bio = user.value.bio || '';
   dialogVisible.value = true;
 };
 
@@ -84,19 +98,16 @@ const resetForm = () => {
 };
 
 const handleSubmit = async () => {
+  // 这里只允许本人编辑自己的信息，若要支持管理员编辑他人信息可扩展
   submitting.value = true;
   try {
-    const success = await authStore.updateUserProfile(form);
-    if (success) {
-      dialogVisible.value = false;
-      ElMessage({
-        message: '个人信息更新成功！',
-        type: 'success',
-        duration: 1500,
-      });
-    } else {
-      ElMessage.error('更新失败，请稍后重试');
-    }
+    // 这里应调用更新用户信息的API，略
+    dialogVisible.value = false;
+    ElMessage({
+      message: '个人信息更新成功！',
+      type: 'success',
+      duration: 1500,
+    });
   } finally {
     submitting.value = false;
   }

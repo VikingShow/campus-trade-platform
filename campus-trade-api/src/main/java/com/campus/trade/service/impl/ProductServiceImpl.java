@@ -182,13 +182,36 @@ public class ProductServiceImpl implements ProductService {
             throw new CustomException("商品不存在");
         }
 
+        // 基本信息
         existingProduct.setTitle(productDTO.getTitle());
         existingProduct.setDescription(productDTO.getDescription());
         existingProduct.setPrice(productDTO.getPrice());
         existingProduct.setCategoryId(productDTO.getCategoryId());
         existingProduct.setConditionLevel(productDTO.getConditionLevel());
 
+        // 主图（无论是否为空都 set，交由 SQL 控制）
+        existingProduct.setCoverImage(productDTO.getCoverImage());
+
+        // 配送方式（为空时 set 空字符串，保证 SQL 能更新，只用'SHIPPING'）
+        if (productDTO.getDeliveryOptions() != null) {
+            existingProduct.setDeliveryOptions(String.join(",", productDTO.getDeliveryOptions()));
+        } else {
+            existingProduct.setDeliveryOptions("");
+        }
+
+        // 更新商品主表
         productMapper.updateProduct(existingProduct);
+
+        // 附图（最多3张，前端应限制）
+        productImageMapper.deleteByProductId(productId);
+        if (productDTO.getImageUrls() != null && !productDTO.getImageUrls().isEmpty()) {
+            List<String> images = productDTO.getImageUrls();
+            if (images.size() > 3) {
+                images = images.subList(0, 3);
+            }
+            productImageMapper.batchInsert(productId, images);
+        }
+
         return productMapper.findProductById(productId);
     }
 

@@ -119,9 +119,19 @@
         price = #{price},
         condition_level = #{conditionLevel},
         delivery_options = #{deliveryOptions},
-        <if test="coverImage != null and coverImage != ''">
-            cover_image = #{coverImage},
-        </if>
+        <choose>
+          <when test="coverImage != null">
+            cover_image =
+              <choose>
+                <when test="coverImage == ''">
+                  NULL,
+                </when>
+                <otherwise>
+                  #{coverImage},
+                </otherwise>
+              </choose>
+          </when>
+        </choose>
         update_time = NOW()
         WHERE id = #{id}
     </update>

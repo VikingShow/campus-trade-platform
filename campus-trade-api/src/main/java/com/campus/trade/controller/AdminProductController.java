@@ -63,4 +63,10 @@ public class AdminProductController {
     public Result<Product> createProduct(@RequestBody AdminProductDTO adminProductDTO) {
         return Result.success(productService.createProductByAdmin(adminProductDTO));
     }
+
+    // 【新增】获取单个商品详情（含主图和所有附图）
+    @GetMapping("/{id}")
+    public Result<Product> getProductDetail(@PathVariable String id) {
+        return Result.success(productService.getProductById(id));
+    }
 }

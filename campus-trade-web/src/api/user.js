@@ -12,3 +12,7 @@ export const getUserRatings = (userId) => {
 export const updateMyProfile = (data) => {
     return apiClient.put('/api/me/profile', data);
 };
+
+export const getUserById = (id) => {
+  return apiClient.get(`/users/${id}/profile`);
+};

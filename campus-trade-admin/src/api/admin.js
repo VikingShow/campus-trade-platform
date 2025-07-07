@@ -33,6 +33,9 @@ export const updateProductByAdmin = (id, data) => {
 export const deleteProductAdmin = (id) => {
     return apiClient.delete(`/admin/products/${id}`);
 };
+export const getProductDetailAdmin = (id) => {
+    return apiClient.get(`/admin/products/${id}`);
+};
 
 // --- Order Management ---
 // 【修改】让 getAllOrdersAdmin 函数可以接收分页参数

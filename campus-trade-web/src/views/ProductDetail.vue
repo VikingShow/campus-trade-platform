@@ -60,6 +60,11 @@
                   <el-rate v-model="product.conditionLevel" disabled />
                 </el-descriptions-item>
                 <el-descriptions-item label="发布时间">{{ new Date(product.createTime).toLocaleDateString() }}</el-descriptions-item>
+                <el-descriptions-item label="配送方式">
+                  <el-tag v-for="opt in deliveryOptionsList" :key="opt" type="info" style="margin-right: 8px;">
+                    {{ opt === 'MEETUP' ? '线下面交' : opt === 'SHIPPING' ? '支持快递' : opt }}
+                  </el-tag>
+                </el-descriptions-item>
                 <el-descriptions-item label="卖家">
                   <div class="seller-box">
                     <el-avatar :src="product.sellerAvatar" icon="UserFilled" />
@@ -157,6 +162,12 @@ const isOwner = computed(() => {
 // 计算当前商品是否已被收藏
 const isFavorited = computed(() => {
   return authStore.favoriteIds.has(String(props.id));
+});
+
+// 【新增】配送方式数组
+const deliveryOptionsList = computed(() => {
+  if (!product.value || !product.value.deliveryOptions) return [];
+  return product.value.deliveryOptions.split(',').filter(Boolean);
 });
 
 // 图片加载失败时的占位图
